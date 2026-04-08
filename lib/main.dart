@@ -10,18 +10,39 @@ import 'package:wizzy/features/auth/screens/register_screen.dart';
 import 'package:wizzy/features/home/screens/home_screen.dart';
 import 'package:wizzy/features/core/services/notification_service.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
-  // Paramètres Firestore Offline
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true,
-    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-  );
+import 'package:flutter/foundation.dart'; // Pour kIsWeb
+import 'dart:io'; // Pour Platform.isWindows
 
-  await NotificationService().init();
-  runApp(const WizzyApp());
+void main() async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // 1. Initialisation Firebase (Utilise la config Web sur Windows)
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // 2. Configuration Firestore (Le cache marche sur Windows aussi)
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+
+    // 3. INITIALISATION DES NOTIFICATIONS (Uniquement sur Android/iOS)
+    // On ignore cette partie sur Windows pour éviter le crash
+    if (!kIsWeb && !Platform.isWindows && !Platform.isLinux) {
+      try {
+        await NotificationService().init();
+      } catch (e) {
+        debugPrint("Notifications non supportées sur ce support");
+      }
+    }
+
+    runApp(const WizzyApp());
+  } catch (e) {
+    // Si ça crash quand même, on pourra voir l'erreur
+    debugPrint("ERREUR AU DÉMARRAGE : $e");
+  }
 }
 
 class WizzyApp extends StatelessWidget {
@@ -37,14 +58,17 @@ class WizzyApp extends StatelessWidget {
       routes: {
         '/splash': (context) => const WizzySplashScreen(),
         '/': (context) => StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
-            }
-            return snapshot.hasData ? const HomeScreen() : const RegisterScreen();
-          },
-        ),
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()));
+                }
+                return snapshot.hasData
+                    ? const HomeScreen()
+                    : const RegisterScreen();
+              },
+            ),
       },
     );
   }
