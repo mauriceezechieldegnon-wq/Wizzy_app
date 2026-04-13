@@ -1,0 +1,51 @@
+name: WIZZY Multi-Platform Build
+
+on:
+  push:
+    branches: [ "main" ] # On utilise ta branche main
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # --- JOB 1 : COMPILATION ANDROID (.apk) ---
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.22.x' # Version stable 2026
+      
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wizzy-android-apk
+          path: build/app/outputs/flutter-apk/*.apk
+
+  # --- JOB 2 : COMPILATION WINDOWS (.exe) ---
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: wizzy-windows-exe
+          path: build/windows/x64/runner/Release/
