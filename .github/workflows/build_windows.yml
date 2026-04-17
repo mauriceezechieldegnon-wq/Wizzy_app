@@ -1,31 +1,57 @@
-name: Build Windows Exe
-on: 
+name: WIZZY Multi-Platform Build
+
+on:
   push:
-    branches: [ master, main ] # Se lance quand tu envoies du code sur master ou main
-  workflow_dispatch: # Permet de lancer le build manuellement sur le site GitHub
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Cette variable règle l'avertissement Node.js
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
-    runs-on: windows-latest
+  build-android:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install Flutter
+      - name: Set up Java
+        uses: actions/setup-java@v4 # Version 4 pour Node 24
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          
-      - name: Install Dependencies
+          cache: true
+
+      - name: Get dependencies
         run: flutter pub get
-        
-      - name: Enable Windows Desktop
-        run: flutter config --enable-windows-desktop
-        
-      - name: Build Windows
-        run: flutter build windows --release
-        
-      - name: Upload EXE Artifact
+
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: WIZZY-Windows-Portable
+          name: WIZZY apk
+          path: build/app/outputs/flutter-apk/*.apk
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: WIZZY
           path: build/windows/x64/runner/Release/

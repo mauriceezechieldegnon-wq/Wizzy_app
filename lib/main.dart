@@ -12,12 +12,6 @@ import 'package:wizzy/features/home/screens/home_screen.dart';
 import 'package:wizzy/features/core/services/notification_service.dart';
 
 void main() async {
-  // Capture les erreurs pour éviter le "ferme tout seul"
-  FlutterError.onError = (details) {
-    FlutterError.presentError(details);
-    debugPrint("CRASH DETECTÉ : ${details.exception}");
-  };
-
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
@@ -29,8 +23,12 @@ void main() async {
     );
 
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      final notificationService = NotificationService();
-      await notificationService.init();
+      try {
+        final notificationService = NotificationService();
+        await notificationService.init();
+      } catch (e) {
+        debugPrint("Notifs désactivées : $e");
+      }
     }
 
     runApp(const WizzyApp());
@@ -47,11 +45,7 @@ class WizzyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Wizzy',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF09090B),
-      ),
+      theme: ThemeData.dark(useMaterial3: true),
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const WizzySplashScreen(),
