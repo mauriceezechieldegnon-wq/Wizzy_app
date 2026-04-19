@@ -12,26 +12,37 @@ import 'package:wizzy/features/home/screens/home_screen.dart';
 import 'package:wizzy/features/core/services/notification_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 1. Initialisation Firebase (Indispensable)
   try {
-    WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint("Erreur Firebase : $e");
+  }
 
-    FirebaseFirestore.instance.settings = const Settings(
-      persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-    );
+  // 2. ON SAUTE TOUT LE RESTE SI C'EST WINDOWS
+  if (!kIsWeb && Platform.isWindows) {
+    debugPrint("Mode Windows : Services mobiles désactivés");
+    runApp(const WizzyApp());
+    return; // On arrête la fonction ici pour Windows
+  }
 
-    // Initialisation sécurisée
+  // 3. LOGIQUE MOBILE UNIQUEMENT (Android / iOS)
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+  );
+
+  try {
     final notificationService = NotificationService();
     await notificationService.init();
-
-    runApp(const WizzyApp());
   } catch (e) {
-    debugPrint("ERREUR AU BOOT : $e");
-    runApp(MaterialApp(home: Scaffold(body: Center(child: Text("Crash : $e")))));
+    debugPrint("Notifs erreur : $e");
   }
-}
 
+  runApp(const WizzyApp());
+}
 class WizzyApp extends StatelessWidget {
   const WizzyApp({super.key});
   @override
