@@ -1,13 +1,18 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:wizzy/features/auth/models/user_model.dart';
 
 class AuthService {
-  // Ces trois lignes DOIVENT être à l'intérieur de la classe
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  
+  // CORRECTION : On ne l'initialise que si on n'est pas sur Windows
+  final GoogleSignIn? _googleSignIn = (kIsWeb || Platform.isAndroid || Platform.isIOS) 
+      ? GoogleSignIn() 
+      : null;
 
   // Stream pour suivre l'utilisateur
   Stream<User?> get userStream => _auth.authStateChanges();
