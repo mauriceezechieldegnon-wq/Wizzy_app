@@ -1,23 +1,22 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:wizzy/features/auth/models/user_model.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
+
+// Vérifie si ton projet s'appelle 'wizzy' ou 'myapp' dans pubspec.yaml
+import 'package:wizzy/features/auth/models/user_model.dart'; 
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
-  // CORRECTION : On ne l'initialise que si on n'est pas sur Windows
+  // Initialisation sécurisée pour Windows/Android/iOS
   final GoogleSignIn? _googleSignIn = (kIsWeb || Platform.isAndroid || Platform.isIOS) 
       ? GoogleSignIn() 
       : null;
 
-  // Stream pour suivre l'utilisateur
-  Stream<User?> get userStream => _auth.authStateChanges();
-
-  // Inscription
+  // Inscription par Email
   Future<void> signUpWithEmail({
     required String email,
     required String password,
@@ -25,7 +24,9 @@ class AuthService {
     required String whatsapp,
   }) async {
     UserCredential credential = await _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
+      email: email, 
+      password: password
+    );
 
     WizzyUser newUser = WizzyUser(
       uid: credential.user!.uid,
@@ -37,44 +38,52 @@ class AuthService {
     await _firestore.collection('users').doc(newUser.uid).set(newUser.toMap());
   }
 
-  // Connexion Google
+  // Connexion Google (CORRIGÉE POUR LE NULL SAFETY)
   Future<void> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return;
+    if (_googleSignIn == null) {
+      debugPrint("Google Sign-In n'est pas supporté sur cette plateforme.");
+      return;
+    }
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    try {
+      // On utilise ?. car _googleSignIn peut être null
+      final GoogleSignInAccount? googleUser = await _googleSignIn?.signIn();
+      if (googleUser == null) return;
 
-    UserCredential userCredential =
-        await _auth.signInWithCredential(credential);
-    User? user = userCredential.user;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-    if (user != null) {
-      final doc = await _firestore.collection('users').doc(user.uid).get();
-      if (!doc.exists) {
-        WizzyUser newUser = WizzyUser(
-          uid: user.uid,
-          username: user.displayName ?? "Joueur",
-          email: user.email!,
-          whatsapp: "",
-        );
-        await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user != null) {
+        final doc = await _firestore.collection('users').doc(user.uid).get();
+        if (!doc.exists) {
+          WizzyUser newUser = WizzyUser(
+            uid: user.uid,
+            username: user.displayName ?? "Joueur",
+            email: user.email!,
+            whatsapp: "", 
+          );
+          await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
+        }
       }
+    } catch (e) {
+      debugPrint("Erreur Google Sign-In : $e");
+      rethrow;
     }
   }
 
-  // Réinitialisation mot de passe
-  Future<void> sendPasswordReset(String email) async {
-    await _auth.sendPasswordResetEmail(email: email);
-  }
-
-  // Déconnexion
+  // Déconnexion (CORRIGÉE POUR LE NULL SAFETY)
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+    try {
+      await _googleSignIn?.signOut(); // Utilisation de ?.
+      await _auth.signOut();
+    } catch (e) {
+      debugPrint("Erreur déconnexion : $e");
+    }
   }
 }
