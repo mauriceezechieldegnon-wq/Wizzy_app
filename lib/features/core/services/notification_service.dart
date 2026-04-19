@@ -5,10 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 
+
+  
+  
 class NotificationService {
-  Future<void> init() async {
-    // SÉCURITÉ : On arrête tout si on est sur Windows, Web ou Linux
-    if (kIsWeb || Platform.isWindows || Platform.isLinux) {
+    Future<void> init() async {
+  if (kIsWeb || Platform.isWindows) {
       debugPrint("Notifications ignorées sur ce support.");
       return;
     }
