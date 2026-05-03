@@ -8,10 +8,15 @@ class DefaultFirebaseOptions {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
+      // --- AJOUTE CES DEUX LIGNES ICI ---
+      case TargetPlatform.windows:
+        return web; 
+      // ----------------------------------
       default:
         throw UnsupportedError('Platform not supported');
     }
   }
+  
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: "AIzaSyDBpiAWsfdDZrdO_Sn7pAaX_xzGttAMeUA",
