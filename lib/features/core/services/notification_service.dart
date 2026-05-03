@@ -1,40 +1,41 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+// On garde les imports, mais on ne les utilise que sous conditions strictes
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
+  // --- AUCUNE VARIABLE ICI AU SOMMET ---
+
   Future<void> init() async {
-    if (kIsWeb || Platform.isWindows || Platform.isLinux) return;
+    // 1. BARRIÈRE DE SÉCURITÉ ABSOLUE
+    if (kIsWeb || !Platform.isAndroid && !Platform.isIOS) {
+      debugPrint("WIZZY Desktop : Les services mobiles ne seront pas chargés.");
+      return; 
+    }
 
-    final FirebaseMessaging fcm = FirebaseMessaging.instance;
-    final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
+    // 2. Initialisation UNIQUEMENT si on est sur Mobile
+    try {
+      final FirebaseMessaging messaging = FirebaseMessaging.instance;
+      final FlutterLocalNotificationsPlugin localNotif = FlutterLocalNotificationsPlugin();
 
-    await fcm.requestPermission(alert: true, badge: true, sound: true);
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidInit, iOS: DarwinInitializationSettings());
-    
-    await localNotifications.initialize(initSettings);
+      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const initSettings = InitializationSettings(android: androidInit, iOS: DarwinInitializationSettings());
+      
+      await localNotif.initialize(initSettings);
+      debugPrint("Services mobiles chargés avec succès.");
+    } catch (e) {
+      debugPrint("Erreur lors du chargement mobile : $e");
+    }
   }
 
-  // CETTE MÉTHODE MANQUAIT OU ÉTAIT MAL NOMMÉE
   Future<void> showVictoryNotification(String title) async {
-    if (kIsWeb || Platform.isWindows) return;
+    if (kIsWeb || !Platform.isAndroid && !Platform.isIOS) return;
     
-    final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
-    const androidDetails = AndroidNotificationDetails(
-      'wizzy_channel', 
-      'Wizzy Alerts',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    
-    await localNotifications.show(
-      0, 
-      "🏆 VICTOIRE !", 
-      title, 
-      const NotificationDetails(android: androidDetails)
-    );
+    final FlutterLocalNotificationsPlugin localNotif = FlutterLocalNotificationsPlugin();
+    const androidDetails = AndroidNotificationDetails('wizzy_channel', 'Wizzy Alerts');
+    await localNotif.show(0, "🏆 VICTOIRE !", title, const NotificationDetails(android: androidDetails));
   }
 }
