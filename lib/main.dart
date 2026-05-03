@@ -15,51 +15,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // 1. Init Firebase
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+    // 2. Config Firestore (Le mode offline marche aussi sur Windows)
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
       cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
 
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      final notificationService = NotificationService();
-      await notificationService.init();
-    }
+    // 3. Appel au service (le service lui-même gère la sécurité Windows maintenant)
+    final notificationService = NotificationService();
+    await notificationService.init();
 
     runApp(const WizzyApp());
   } catch (e) {
+    // Si Windows détecte quand même un problème de plateforme
     runApp(MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.black,
-        body: Center(child: Text("Erreur démarrage : $e", style: const TextStyle(color: Colors.white))),
+        body: Center(child: Text("WIZZY PC : $e", style: const TextStyle(color: Colors.white))),
       ),
     ));
   }
 }
 
-class WizzyApp extends StatelessWidget {
-  const WizzyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Wizzy',
-      theme: ThemeData.dark(useMaterial3: true),
-      initialRoute: '/splash',
-      routes: {
-        '/splash': (context) => const WizzySplashScreen(),
-        '/': (context) => StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
-            }
-            return snapshot.hasData ? const HomeScreen() : const RegisterScreen();
-          },
-        ),
-      },
-    );
-  }
-}
+// ... garde le reste du fichier WizzyApp ...
