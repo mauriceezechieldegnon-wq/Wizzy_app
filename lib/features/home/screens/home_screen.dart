@@ -5,17 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
-// --- IMPORTS DES COMPOSANTS ET ÉCRANS ---
-import '../../../core/constants/app_colors.dart';
-import '../../../shared/widgets/dls_card.dart';
-import '../../quiz/screens/arena_menu_screen.dart';
-import '../../marketplace/screens/marketplace_screen.dart';
-import '../../messenger/screens/users_list_screen.dart';
-import '../../ai_assistant/screens/ai_chat_screen.dart';
-import '../../profile/screens/settings_screen.dart';
-import '../../admin/screens/admin_dashboard_screen.dart';
-import '../../quiz/screens/lucky_draw_screen.dart';
-import 'ad_player_screen.dart'; // Import de l'écran de pub avec timer
+import 'package:wizzy/core/constants/app_colors.dart';
+import 'package:wizzy/shared/widgets/dls_card.dart';
+import 'package:wizzy/features/quiz/screens/arena_menu_screen.dart';
+import 'package:wizzy/features/marketplace/screens/marketplace_screen.dart';
+import 'package:wizzy/features/messenger/screens/users_list_screen.dart';
+import 'package:wizzy/features/ai_assistant/screens/ai_chat_screen.dart';
+import 'package:wizzy/features/profile/screens/settings_screen.dart';
+import 'package:wizzy/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:wizzy/features/quiz/screens/lucky_draw_screen.dart';
+import 'package:wizzy/features/home/screens/ad_player_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,52 +22,38 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
-
-    // --- LOGIQUE RESPONSIVE (POUR PC ET MOBILE) ---
     double screenWidth = MediaQuery.of(context).size.width;
-    // Sur PC (largeur > 900), on met 4 colonnes. Sur Mobile, 2.
     int crossAxisCount = screenWidth > 900 ? 4 : 2;
-    // Ajustement de la forme des cartes selon la largeur
     double aspectRatio = screenWidth > 900 ? 1.5 : 0.9;
 
     return Scaffold(
       backgroundColor: const Color(0xFF09090B),
       body: Stack(
         children: [
-          // Effet de halo néon
           Positioned(top: -50, left: -50, child: _glow(AppColors.primaryPurple)),
-          
           SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // --- HEADER : NOM + AVATAR ---
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("WIZZY", 
-                          style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -1)),
+                        const Text("WIZZY", style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -1)),
                         _userAvatar(context, user),
                       ],
                     ),
                   ),
                 ),
-
-                // --- SOLDE DE POINTS ---
                 SliverToBoxAdapter(child: _buildPointsBanner(user?.uid ?? "")),
-
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(left: 24, top: 30, bottom: 15),
-                    child: Text("SÉLECTION ÉLITE", 
-                      style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                    child: Text("SÉLECTION ÉLITE", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2)),
                   ),
                 ),
-
-                // --- GRILLE DLS RESPONSIVE (4 CARTES) ---
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   sliver: SliverGrid(
@@ -80,34 +65,27 @@ class HomeScreen extends StatelessWidget {
                     ),
                     delegate: SliverChildListDelegate([
                       DlsCard(
-                        title: "L'ARÈNE", subtitle: "MODE GLORE", rating: "98", icon: FontAwesomeIcons.boltLightning, color: Colors.amber,
+                        title: "L'ARÈNE", subtitle: "GLORY MODE", rating: "98", icon: FontAwesomeIcons.bolt, color: Colors.amber,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArenaMenuScreen())),
                       ),
                       DlsCard(
-                        title: "LE BAZAR", subtitle: "ARTICLES RARES", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent,
+                        title: "LE BAZAR", subtitle: "RARE ITEMS", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen())),
                       ),
                       DlsCard(
-                        title: "LE SALON", subtitle: "COMMUNAUTÉ", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent,
+                        title: "LE SALON", subtitle: "SOCIAL HUB", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen())),
                       ),
                       DlsCard(
-                        title: "LE GÉNIE", subtitle: "IA WIZZY", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent,
+                        title: "LE GÉNIE", subtitle: "AI BRAIN", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen())),
                       ),
                     ]),
                   ),
                 ),
-
-                // --- SECTION MONÉTISATION (PUB + TIRAGE) ---
                 const SliverToBoxAdapter(child: SizedBox(height: 30)),
-                
-                // Nouvelle carte Pub (redirige vers le timer)
                 SliverToBoxAdapter(child: _buildAdCard(context)),
-
-                // Carte Tirage au sort
                 SliverToBoxAdapter(child: _buildLuckyDrawCard(context)),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 50)),
               ],
             ),
@@ -116,8 +94,6 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  // --- COMPOSANTS INTERNES ---
 
   Widget _glow(Color c) => Container(
     width: 300, height: 300, 
@@ -135,7 +111,6 @@ class HomeScreen extends StatelessWidget {
         final data = snapshot.data?.data() as Map<String, dynamic>?;
         bool isAdmin = data?['isAdmin'] ?? false;
         String? photo = data?['photoUrl'] ?? user?.photoURL;
-
         return GestureDetector(
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())),
           onLongPress: isAdmin ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminDashboardScreen())) : null,
@@ -170,7 +145,7 @@ class HomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("CRÉDITS DISPONIBLES", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const Text("SOLDE WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 5),
                   Text("$pts PTS", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
                 ]),
@@ -187,7 +162,6 @@ class HomeScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: GestureDetector(
-        // NAVIGATION VERS LE LECTEUR DE PUB (15 PTS)
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdPlayerScreen())),
         child: Container(
           width: double.infinity, padding: const EdgeInsets.all(20),
@@ -196,7 +170,7 @@ class HomeScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(24), 
             border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3))
           ),
-          child: Row(children: const [
+          child: const Row(children: [
             Icon(Icons.play_circle_fill, color: Colors.blueAccent),
             SizedBox(width: 15),
             Text("REGARDER UNE VIDÉO (+15 PTS)", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
@@ -218,7 +192,7 @@ class HomeScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(24), 
             border: Border.all(color: Colors.amber.withValues(alpha: 0.3))
           ),
-          child: Row(children: const [
+          child: const Row(children: [
             Icon(FontAwesomeIcons.gift, color: Colors.amber, size: 18),
             SizedBox(width: 15),
             Text("TIRAGE AU SORT MENSUEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
