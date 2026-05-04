@@ -50,17 +50,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // Fonction Google Sign-In
   void _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
-    try {
-      await _authService.signInWithGoogle();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text("Erreur Google : $e"),
-            backgroundColor: Colors.redAccent),
-      );
-    } finally {
+  if (Platform.isWindows) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Google Sign-In arrive bientôt sur Windows. Utilise ton Email !"))
+    );
+    return;
+  }finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
