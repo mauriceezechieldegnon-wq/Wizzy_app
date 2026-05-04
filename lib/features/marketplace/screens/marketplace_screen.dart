@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/constants/app_colors.dart';
-import '../models/product_model.dart';
+import 'package:wizzy/core/constants/app_colors.dart';
+import 'package:wizzy/features/marketplace/models/product_model.dart';
 
 class MarketplaceScreen extends StatelessWidget {
   const MarketplaceScreen({super.key});
@@ -11,15 +11,15 @@ class MarketplaceScreen extends StatelessWidget {
   void _contactSeller(Product product) async {
     final message = "Bonjour, je suis intéressé par ${product.name} sur WIZZY.";
     final url = "https://wa.me/${product.sellerWhatsApp}?text=${Uri.encodeComponent(message)}";
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    // --- LOGIQUE DE GRILLE RESPONSIVE ---
     int crossAxisCount = screenWidth > 1200 ? 6 : (screenWidth > 800 ? 4 : 2);
     double aspectRatio = screenWidth > 800 ? 0.85 : 0.7;
 
@@ -28,7 +28,7 @@ class MarketplaceScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("LE BAZAR", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+        title: const Text("LE BAZAR", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         leading: const BackButton(color: Colors.white),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -37,14 +37,10 @@ class MarketplaceScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: AppColors.primaryPurple));
           }
-
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("Boutique vide...", style: TextStyle(color: Colors.white24)));
           }
-
-          final products = snapshot.data!.docs.map((doc) => 
-            Product.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList();
-
+          final products = snapshot.data!.docs.map((doc) => Product.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList();
           return GridView.builder(
             padding: const EdgeInsets.all(20),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -69,17 +65,12 @@ class MarketplaceScreen extends StatelessWidget {
         border: Border.all(color: Colors.white10),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-              child: Image.network(
-                p.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (context, error, stack) => const Icon(Icons.image, color: Colors.white10),
-              ),
+              child: Image.network(p.imageUrl, fit: BoxFit.cover, width: double.infinity,
+                errorBuilder: (context, error, stack) => const Icon(Icons.image, color: Colors.white10)),
             ),
           ),
           Padding(
@@ -87,19 +78,13 @@ class MarketplaceScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis, 
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                Text("${p.price} F", 
-                  style: const TextStyle(color: AppColors.accentYellow, fontWeight: FontWeight.w900, fontSize: 14)),
+                Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                Text("${p.price} F", style: const TextStyle(color: AppColors.accentYellow, fontWeight: FontWeight.w900, fontSize: 14)),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () => _contactSeller(p),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryPurple,
-                    minimumSize: const Size(double.infinity, 30),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text("ACHETER", style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple, minimumSize: const Size(double.infinity, 30)),
+                  child: const Text("ACHETER", style: TextStyle(fontSize: 9, color: Colors.white)),
                 ),
               ],
             ),
