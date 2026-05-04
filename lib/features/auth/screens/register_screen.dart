@@ -60,7 +60,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Container(
                   width: double.infinity, height: 60,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [AppColors.primaryPurple, Color(0xFF9D50BB)]),
+                    gradient: LinearGradient(colors: [AppColors.primaryPurple, const Color(0xFF9D50BB)]),
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Center(child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text("CRÉER MON COMPTE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
