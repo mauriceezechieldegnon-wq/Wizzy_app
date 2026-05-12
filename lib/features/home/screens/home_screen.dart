@@ -97,10 +97,10 @@ class HomeScreen extends StatelessWidget {
     width: 300, height: 300, 
     decoration: BoxDecoration(
       shape: BoxShape.circle, 
-      color: c.withValues(alpha: 0.15), 
+      color: c.withValues(alpha: 0.15), // PAS DE CONST ICI ✅
       boxShadow: [BoxShadow(color: c.withValues(alpha: 0.1), blurRadius: 100, spreadRadius: 50)]
     )
-  );
+);
 
   Widget _userAvatar(BuildContext context, User? user) {
     return StreamBuilder<DocumentSnapshot>(
@@ -134,10 +134,10 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Container(
             padding: const EdgeInsets.all(25),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white10),
+           decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05), // PAS DE CONST ✅
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white10),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
