@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
     double aspectRatio = screenWidth > 900 ? 1.5 : 0.9;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: AppColors.backgroundBlack,
       body: Stack(
         children: [
           Positioned(top: -50, left: -50, child: _glow(AppColors.primaryPurple)),
@@ -97,10 +97,10 @@ class HomeScreen extends StatelessWidget {
     width: 300, height: 300, 
     decoration: BoxDecoration(
       shape: BoxShape.circle, 
-      color: c.withValues(alpha: 0.15), // PAS DE CONST ICI ✅
+      color: c.withValues(alpha: 0.15), 
       boxShadow: [BoxShadow(color: c.withValues(alpha: 0.1), blurRadius: 100, spreadRadius: 50)]
     )
-);
+  );
 
   Widget _userAvatar(BuildContext context, User? user) {
     return StreamBuilder<DocumentSnapshot>(
@@ -114,7 +114,10 @@ class HomeScreen extends StatelessWidget {
           onLongPress: isAdmin ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminDashboardScreen())) : null,
           child: Container(
             padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.primaryPurple, AppColors.accentYellow])),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle, 
+              gradient: LinearGradient(colors: [AppColors.primaryPurple, AppColors.accentYellow])
+            ),
             child: CircleAvatar(
               radius: 18, backgroundColor: Colors.black,
               backgroundImage: NetworkImage(photo ?? "https://ui-avatars.com/api/?name=${data?['username'] ?? 'W'}&background=6200EE&color=fff"),
@@ -134,10 +137,10 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Container(
             padding: const EdgeInsets.all(25),
-           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05), // PAS DE CONST ✅
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.white10),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
