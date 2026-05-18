@@ -31,7 +31,6 @@ class MarketplaceScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text("Vide", style: TextStyle(color: Colors.white24)));
-          
           final products = snapshot.data!.docs.map((doc) => Product.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList();
           return GridView.builder(
             padding: const EdgeInsets.all(20),
@@ -56,7 +55,7 @@ class MarketplaceScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(p.name, maxLines: 1, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                Text("${p.price} F", style: const TextStyle(color: AppColors.accentYellow, fontWeight: FontWeight.w900)),
+                Text("${p.price} F", style: TextStyle(color: AppColors.accentYellow, fontWeight: FontWeight.w900, fontSize: 14)),
                 const SizedBox(height: 8),
                 ElevatedButton(onPressed: () => _contactSeller(p), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple, minimumSize: const Size(double.infinity, 30)), child: const Text("ACHETER", style: TextStyle(fontSize: 9, color: Colors.white))),
               ],
