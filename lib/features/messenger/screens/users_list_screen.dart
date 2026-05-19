@@ -12,7 +12,6 @@ class UsersListScreen extends StatefulWidget {
 
 class _UsersListScreenState extends State<UsersListScreen> {
   String searchQuery = "";
-
   @override
   Widget build(BuildContext context) {
     final currentId = FirebaseAuth.instance.currentUser!.uid;
@@ -36,19 +35,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
           }).toList();
 
           return ListView.builder(
-            itemCount: users.length,
-            padding: const EdgeInsets.all(20),
+            itemCount: users.length, padding: const EdgeInsets.all(20),
             itemBuilder: (context, index) {
               final userData = users[index].data() as Map<String, dynamic>;
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white10),
-                ),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
                 child: ListTile(
-                  leading: CircleAvatar(backgroundImage: NetworkImage(userData['photoUrl'] ?? "")),
+                  leading: CircleAvatar(backgroundImage: NetworkImage(userData['photoUrl'] ?? "https://ui-avatars.com/api/?name=W")),
                   title: Text(userData['username'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(receiverId: users[index].id, receiverName: userData['username']))),
                 ),
