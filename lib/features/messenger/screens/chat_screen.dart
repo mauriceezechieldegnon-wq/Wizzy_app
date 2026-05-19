@@ -7,9 +7,7 @@ import 'package:wizzy/features/messenger/models/message_model.dart';
 class ChatScreen extends StatefulWidget {
   final String receiverId;
   final String receiverName;
-
   const ChatScreen({super.key, required this.receiverId, required this.receiverName});
-
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
@@ -27,18 +25,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(getChatId());
-    final messageData = MessageModel(
-      senderId: currentId,
-      text: _messageController.text.trim(),
-      timestamp: Timestamp.now(),
-    );
+    final messageData = MessageModel(senderId: currentId, text: _messageController.text.trim(), timestamp: Timestamp.now());
     _messageController.clear();
     await chatRef.collection('messages').add(messageData.toMap());
-    await chatRef.set({
-      'lastMessage': messageData.text,
-      'lastTimestamp': messageData.timestamp,
-      'participants': [currentId, widget.receiverId],
-    });
+    await chatRef.set({'lastMessage': messageData.text, 'lastTimestamp': messageData.timestamp, 'participants': [currentId, widget.receiverId]});
   }
 
   @override
@@ -50,54 +40,29 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('chats').doc(getChatId()).collection('messages')
-                  .orderBy('timestamp', descending: true).snapshots(),
+              stream: FirebaseFirestore.instance.collection('chats').doc(getChatId()).collection('messages').orderBy('timestamp', descending: true).snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
                 return ListView.builder(
-                  reverse: true,
-                  padding: const EdgeInsets.all(20),
-                  itemCount: docs.length,
+                  reverse: true, padding: const EdgeInsets.all(20), itemCount: docs.length,
                   itemBuilder: (context, index) {
                     final msg = MessageModel.fromFirestore(docs[index].data() as Map<String, dynamic>);
                     bool isMe = msg.senderId == currentId;
-                    return _buildBubble(msg.text, isMe);
+                    return Align(
+                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(color: isMe ? AppColors.primaryPurple : Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(15)),
+                        child: Text(msg.text, style: const TextStyle(color: Colors.white)),
+                      ),
+                    );
                   },
                 );
               },
             ),
           ),
-          _buildInput(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBubble(String text, bool isMe) {
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isMe ? AppColors.primaryPurple : Colors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Text(text, style: const TextStyle(color: Colors.white)),
-      ),
-    );
-  }
-
-  Widget _buildInput() {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      color: Colors.black,
-      child: Row(
-        children: [
-          Expanded(child: TextField(controller: _messageController, style: const TextStyle(color: Colors.white))),
-          IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send, color: AppColors.accentYellow)),
+          Container(padding: const EdgeInsets.all(15), color: Colors.black, child: Row(children: [Expanded(child: TextField(controller: _messageController, style: const TextStyle(color: Colors.white))), IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send, color: AppColors.accentYellow))])),
         ],
       ),
     );
