@@ -1,78 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import 'package:wizzy/core/constants/app_colors.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
-
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
 }
 
 class _AddProductScreenState extends State<AddProductScreen> {
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _urlController = TextEditingController();
-  final _waController = TextEditingController();
+  final nC = TextEditingController();
+  final pC = TextEditingController();
+  final uC = TextEditingController();
+  final wC = TextEditingController();
 
-  void _saveProduct() async {
-    if (_nameController.text.isEmpty || _priceController.text.isEmpty) return;
-
+  void _save() async {
     await FirebaseFirestore.instance.collection('products').add({
-      'name': _nameController.text,
-      'price': int.parse(_priceController.text),
-      'imageUrl': _urlController.text,
-      'sellerWhatsApp': _waController.text,
-      'createdAt': FieldValue.serverTimestamp(),
+      'name': nC.text,
+      'price': int.parse(pC.text),
+      'imageUrl': uC.text,
+      'sellerWhatsApp': wC.text,
     });
     if (!mounted) return;
-
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
-      appBar: AppBar(
-          title: const Text("NOUVEAU PRODUIT",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
-      body: SingleChildScrollView(
+      backgroundColor: AppColors.backgroundBlack,
+      appBar: AppBar(backgroundColor: Colors.transparent, title: const Text("AJOUTER PRODUIT")),
+      body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            _input("Nom de l'article", _nameController),
-            _input("Prix (CFA)", _priceController, isNum: true),
-            _input("Lien de l'image (URL)", _urlController),
-            _input("WhatsApp (ex: 22960000000)", _waController),
+            TextField(controller: nC, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(hintText: "Nom", hintStyle: TextStyle(color: Colors.white24))),
+            TextField(controller: pC, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(hintText: "Prix"), keyboardType: TextInputType.number),
+            TextField(controller: uC, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(hintText: "Lien Image")),
+            TextField(controller: wC, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(hintText: "WhatsApp")),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _saveProduct,
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryPurple,
-                  minimumSize: const Size(double.infinity, 55)),
-              child: const Text("METTRE EN VENTE"),
-            ),
+            ElevatedButton(onPressed: _save, style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple), child: const Text("PUBLIER", style: TextStyle(color: Colors.white))),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _input(String label, TextEditingController controller,
-      {bool isNum = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: TextField(
-        controller: controller,
-        keyboardType: isNum ? TextInputType.number : TextInputType.text,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.white30),
-          filled: true,
-          fillColor: Colors.white.withValues(alpha: 0.05),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
         ),
       ),
     );
