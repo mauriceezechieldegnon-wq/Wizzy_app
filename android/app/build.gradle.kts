@@ -19,19 +19,32 @@ val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "
 
 android {
     namespace = "com.dem.wizzy"
-    compileSdk = 35 // On reste sur le stable 35 ✅
+    // --- FORCE LE PASSAGE AU SDK 36 POUR LES PLUGINS 2026 ---
+    compileSdk = 36 
+
+    compileOptions {
+        // --- REQUIERT PAR LES NOTIFICATIONS (ERREUR 1 DU LOG) ---
+        isCoreLibraryDesugaringEnabled = true 
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
     defaultConfig {
         applicationId = "com.dem.wizzy"
-        minSdk = 23 // Compatibilité avec les anciens téléphones (Android 6+)
-        targetSdk = 35 // Optimisation pour les tel récents
+        // On garde 23 pour que le téléphone de ton ami soit compatible
+        minSdk = 23 
+        targetSdk = 36
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
         multiDexEnabled = true
     }
+
     buildTypes {
         getByName("release") {
-            // Utilisation du signing de debug pour que l'APK soit installable immédiatement
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             isShrinkResources = false
@@ -44,5 +57,6 @@ flutter {
 }
 
 dependencies {
+    // --- BIBLIOTHÈQUE DE DESUGARING POUR LES NOTIFS ---
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
