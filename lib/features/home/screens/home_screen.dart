@@ -8,7 +8,7 @@ import 'dart:io';
 // --- IMPORTS FIXES ---
 import 'package:wizzy/core/constants/app_colors.dart';
 import 'package:wizzy/shared/widgets/dls_card.dart';
-import 'package:wizzy/features/quiz/screens/category_picker_screen.dart'; 
+import 'package:wizzy/features/home/screens/category_picker_screen.dart';
 import 'package:wizzy/features/marketplace/screens/marketplace_screen.dart';
 import 'package:wizzy/features/messenger/screens/users_list_screen.dart';
 import 'package:wizzy/features/ai_assistant/screens/ai_chat_screen.dart';
