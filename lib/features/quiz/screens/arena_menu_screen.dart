@@ -32,7 +32,8 @@ class ArenaMenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildArenaOption(BuildContext context, {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+  // LOGIQUE SÉCURISÉE POUR LES ICÔNES DYNAMIC
+  Widget _buildArenaOption(BuildContext context, {required String title, required String subtitle, required dynamic icon, required Color color, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -43,13 +44,15 @@ class ArenaMenuScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1), // Correction withValues
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
             ),
             child: Row(
               children: [
-                Icon(icon, color: color, size: 24),
+                icon is IconData 
+                  ? Icon(icon, color: color, size: 24) 
+                  : FaIcon(icon, color: color, size: 24),
                 const SizedBox(width: 20),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w900)), const Text("Clique pour commencer", style: TextStyle(color: Colors.white38, fontSize: 12))])),
                 const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 16),
