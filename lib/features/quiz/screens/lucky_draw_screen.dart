@@ -17,8 +17,6 @@ class LuckyDrawScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.white),
-        title: const Text("TIRAGE AU SORT", 
-          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 1.5)),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
@@ -28,108 +26,66 @@ class LuckyDrawScreen extends StatelessWidget {
           var userData = snapshot.data!.data() as Map<String, dynamic>;
           int points = userData['points'] ?? 0;
           bool hasPaid = userData['hasPaidEntry'] ?? false;
-          
-          // RÈGLE : Il faut au moins 1000 points pour être qualifié
           bool isQualified = points >= 1000; 
 
-         // Dans le build du LuckyDrawScreen, remplace le Padding par celui-ci :
-return Padding(
-  padding: const EdgeInsets.all(24.0),
-  child: SizedBox.expand( // Prend toute la place pour centrer
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center, // CENTRE VERTICALEMENT ✅
-      crossAxisAlignment: CrossAxisAlignment.center, // CENTRE HORIZONTALEMENT ✅
-      children: [
-        const Text("TIRAGE MENSUEL", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 2)),
-        const SizedBox(height: 40),
-        _buildStatusIcon(hasPaid, isQualified),
-        const SizedBox(height: 30),
-        Text(
-          hasPaid ? "TICKET VALIDÉ ✅" : (isQualified ? "TU ES QUALIFIÉ !" : "PAS ENCORE QUALIFIÉ"),
-          textAlign: TextAlign.center,
-          style: TextStyle(color: hasPaid ? Colors.greenAccent : AppColors.accentYellow, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-       
-                
-                // --- ICÔNE DE STATUT DYNAMIQUE ---
-                _buildStatusIcon(hasPaid, isQualified),
-                
-                const SizedBox(height: 30),
+          return SizedBox.expand(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center, // Centrage vertical
+                crossAxisAlignment: CrossAxisAlignment.center, // Centrage horizontal
+                children: [
+                  const Text("TIRAGE MENSUEL", 
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                  const SizedBox(height: 40),
+                  
+                  _buildStatusIcon(hasPaid, isQualified),
+                  
+                  const SizedBox(height: 30),
 
-                // --- TEXTE DE STATUT ---
-                Text(
-                  hasPaid ? "INSCRIPTION VALIDÉE !" : (isQualified ? "TU ES QUALIFIÉ !" : "PAS ENCORE QUALIFIÉ"),
-                  style: TextStyle(
-                    color: hasPaid ? Colors.greenAccent : (isQualified ? AppColors.accentYellow : Colors.white24),
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
+                  Text(
+                    hasPaid ? "INSCRIPTION VALIDÉE !" : (isQualified ? "TU ES QUALIFIÉ !" : "PAS ENCORE QUALIFIÉ"),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: hasPaid ? Colors.greenAccent : (isQualified ? AppColors.accentYellow : Colors.white24),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 10),
-                Text(
-                  hasPaid
-                      ? "Ton ticket est enregistré. Tirage le 30 du mois."
-                      : (isQualified
-                          ? "Paie 100F pour participer au tirage mensuel."
-                          : "Gagne encore ${1000 - points} points pour débloquer ton ticket."),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white54),
-                ),
+                  const SizedBox(height: 10),
+                  Text(
+                    hasPaid
+                        ? "Ton ticket est enregistré. Tirage le 30 du mois."
+                        : (isQualified
+                            ? "Paie 100F pour participer au tirage mensuel."
+                            : "Gagne encore ${1000 - points} points pour débloquer ton ticket."),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white54),
+                  ),
 
-                const Spacer(),
+                  const Spacer(),
+                  _buildWinnerHistory(),
+                  const SizedBox(height: 30),
 
-                // --- HISTORIQUE DU DERNIER GAGNANT ---
-                _buildWinnerHistory(),
-
-                const SizedBox(height: 40),
-
-                // --- BOUTON DE PAIEMENT FEDAPAY ---
-                if (isQualified && !hasPaid)
-                  GestureDetector(
-                    onTap: () => PaymentService().startTransaction(context, 100),
-                    child: Container(
-                      width: double.infinity,
-                      height: 65,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Colors.orange, Colors.redAccent]),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.orange.withValues(alpha: 0.3), 
-                            blurRadius: 15, 
-                            offset: const Offset(0, 8)
-                          )
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "PARTICIPER POUR 100F",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
+                  if (isQualified && !hasPaid)
+                    GestureDetector(
+                      onTap: () => PaymentService().startTransaction(context, 100),
+                      child: Container(
+                        width: double.infinity,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [Colors.orange, Colors.redAccent]),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Center(
+                          child: Text("PARTICIPER POUR 100F", 
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ),
-                  ),
-                  
-                // --- MESSAGE SI DÉJÀ PAYÉ ---
-                if (hasPaid)
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.2)),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.greenAccent, size: 20),
-                        SizedBox(width: 10),
-                        Text("TICKET ACTIF", style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -140,14 +96,8 @@ return Padding(
   Widget _buildStatusIcon(bool hasPaid, bool isQualified) {
     IconData icon = Icons.lock_outline;
     Color color = Colors.white10;
-
-    if (hasPaid) {
-      icon = Icons.verified_user;
-      color = Colors.greenAccent;
-    } else if (isQualified) {
-      icon = Icons.confirmation_number;
-      color = AppColors.accentYellow;
-    }
+    if (hasPaid) { icon = Icons.verified_user; color = Colors.greenAccent; }
+    else if (isQualified) { icon = Icons.confirmation_number; color = AppColors.accentYellow; }
 
     return Container(
       padding: const EdgeInsets.all(40),
@@ -162,31 +112,15 @@ return Padding(
 
   Widget _buildWinnerHistory() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('draw_history')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('draw_history').orderBy('timestamp', descending: true).limit(1).snapshots(),
       builder: (context, snap) {
         if (!snap.hasData || snap.data!.docs.isEmpty) return const SizedBox();
         var winner = snap.data!.docs.first;
         return Container(
           padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.stars, color: Colors.amber, size: 18),
-              const SizedBox(width: 10),
-              Text(
-                "Dernier gagnant : ${winner['winnerName']} 🏆",
-                style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(15)),
+          child: Text("Dernier gagnant : ${winner['winnerName']} 🏆",
+            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
         );
       },
     );
