@@ -5,25 +5,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:wizzy/firebase_options.dart';
-
 import 'package:wizzy/features/auth/screens/splash_screen.dart';
 import 'package:wizzy/features/auth/screens/register_screen.dart';
 import 'package:wizzy/features/home/screens/home_screen.dart';
-import 'package:wizzy/core/services/notification_service.dart'; // IMPORT CORRIGÉ
+import 'package:wizzy/core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    
+    // Uniquement pour Mobile
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       FirebaseFirestore.instance.settings = const Settings(
         persistenceEnabled: true,
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
-      await NotificationService().init();
+      final notificationService = NotificationService();
+      await notificationService.init();
     }
   } catch (e) {
-    debugPrint("Erreur démarrage : $e");
+    debugPrint("Erreur démarrage: $e");
   }
   runApp(const WizzyApp());
 }
@@ -42,8 +44,10 @@ class WizzyApp extends StatelessWidget {
         '/': (context) => StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
-            if (snapshot.hasData) return const HomeScreen();
-            return const RegisterScreen();
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            }
+            return snapshot.hasData ? const HomeScreen() : const RegisterScreen();
           },
         ),
       },
