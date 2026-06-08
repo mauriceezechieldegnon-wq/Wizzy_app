@@ -19,29 +19,16 @@ val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "
 
 android {
     namespace = "com.dem.wizzy"
-    // --- CORRECTION : PASSAGE AU SDK 36 ---
-    compileSdk = 36 
-
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    compileSdk = 35 // On reste sur le stable 35 ✅
 
     defaultConfig {
         applicationId = "com.dem.wizzy"
-        minSdk = 23 
-        // --- CORRECTION : CIBLE LE SDK 36 ---
-        targetSdk = 36 
+        minSdk = 23 // Compatibilité avec les anciens téléphones (Android 6+)
+        targetSdk = 35 // Optimisation pour les tel récents
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
         multiDexEnabled = true
     }
-
     buildTypes {
         getByName("release") {
             // Utilisation du signing de debug pour que l'APK soit installable immédiatement
