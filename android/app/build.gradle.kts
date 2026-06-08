@@ -6,36 +6,24 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.reader(Charsets.UTF_8).use { reader -> localProperties.load(reader) }
-}
-
 android {
     namespace = "com.dem.wizzy"
-    compileSdk = 36 // Mis à jour pour les plugins récents
-
-    
+    compileSdk = 34
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        // CHANGE ICI : Passe de VERSION_1_8 à VERSION_17
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        
         jvmTarget = "17"
     }
-    
-   
 
     defaultConfig {
         applicationId = "com.dem.wizzy"
-        minSdk = flutter.minSdkVersion
-        targetSdk = 36
+        minSdk = 21
+        targetSdk = 34
         multiDexEnabled = true
     }
 }
