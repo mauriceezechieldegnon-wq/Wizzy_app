@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 
-// --- IMPORTS DES SERVICES ET CONSTANTES ---
+// --- IMPORTS FIXES ---
 import 'package:wizzy/core/constants/app_colors.dart';
 import 'package:wizzy/shared/widgets/dls_card.dart';
-
-// --- IMPORTS DES ÉCRANS ---
-import 'package:wizzy/features/quiz/screens/category_picker_screen.dart'; // Pour le choix du thème
+import 'package:wizzy/features/quiz/screens/category_picker_screen.dart'; 
 import 'package:wizzy/features/marketplace/screens/marketplace_screen.dart';
 import 'package:wizzy/features/messenger/screens/users_list_screen.dart';
 import 'package:wizzy/features/ai_assistant/screens/ai_chat_screen.dart';
@@ -23,52 +23,38 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
-
-    // --- LOGIQUE RESPONSIVE ---
     double screenWidth = MediaQuery.of(context).size.width;
-    // 4 colonnes sur PC (>900px), sinon 2 sur mobile
     int crossAxisCount = screenWidth > 900 ? 4 : 2;
-    // Ratio pour que les cartes ressemblent à des cartes DLS
-    double aspectRatio = screenWidth > 900 ? 1.4 : 0.85;
+    double aspectRatio = screenWidth > 900 ? 1.5 : 0.9;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
       body: Stack(
         children: [
-          // Effet de lumière violette en fond
           Positioned(top: -50, left: -50, child: _glow(AppColors.primaryPurple)),
-          
           SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // --- HEADER : LOGO + AVATAR ---
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("WIZZY", 
-                          style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -1)),
+                        const Text("WIZZY", style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -1)),
                         _userAvatar(context, user),
                       ],
                     ),
                   ),
                 ),
-
-                // --- BANNIÈRE DE POINTS DYNAMIQUE ---
                 SliverToBoxAdapter(child: _buildPointsBanner(user?.uid ?? "")),
-
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(left: 24, top: 30, bottom: 15),
-                    child: Text("SÉLECTION ÉLITE", 
-                      style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                    child: Text("SÉLECTION ÉLITE", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2)),
                   ),
                 ),
-
-                // --- GRILLE DE CARTES DLS ---
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   sliver: SliverGrid(
@@ -79,49 +65,33 @@ class HomeScreen extends StatelessWidget {
                       childAspectRatio: aspectRatio,
                     ),
                     delegate: SliverChildListDelegate([
+                      // PAS DE CONST ICI ✅
                       DlsCard(
-                        title: "L'ARÈNE", 
-                        subtitle: "QUIZ PLANET", 
-                        rating: "98", 
-                        icon: FontAwesomeIcons.boltLightning, 
-                        color: Colors.amber,
-                        // Correction : On va vers le sélecteur de thèmes
+                        title: "L'ARÈNE", subtitle: "MODE GLORE", rating: "98", 
+                        icon: FontAwesomeIcons.boltLightning, color: Colors.amber,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryPickerScreen())),
                       ),
                       DlsCard(
-                        title: "LE BAZAR", 
-                        subtitle: "MARKETPLACE", 
-                        rating: "94", 
-                        icon: FontAwesomeIcons.bagShopping, 
-                        color: Colors.blueAccent,
+                        title: "LE BAZAR", subtitle: "MARKETPLACE", rating: "94", 
+                        icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen())),
                       ),
                       DlsCard(
-                        title: "LE SALON", 
-                        subtitle: "MESSENGER", 
-                        rating: "88", 
-                        icon: FontAwesomeIcons.comments, 
-                        color: Colors.greenAccent,
+                        title: "LE SALON", subtitle: "MESSENGER", rating: "88", 
+                        icon: FontAwesomeIcons.comments, color: Colors.greenAccent,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen())),
                       ),
                       DlsCard(
-                        title: "LE GÉNIE", 
-                        subtitle: "IA WIZZY", 
-                        rating: "99", 
-                        icon: FontAwesomeIcons.brain, 
-                        color: Colors.deepPurpleAccent,
+                        title: "LE GÉNIE", subtitle: "IA WIZZY", rating: "99", 
+                        icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent,
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen())),
                       ),
                     ]),
                   ),
                 ),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 30)),
-                
-                // --- BANNIÈRES DE MONÉTISATION ---
-                SliverToBoxAdapter(child: _buildAdCard(context)), // Pub +15 pts
-                SliverToBoxAdapter(child: _buildLuckyDrawCard(context)), // Tirage au sort
-
+                SliverToBoxAdapter(child: _buildAdCard(context)),
+                SliverToBoxAdapter(child: _buildLuckyDrawCard(context)),
                 const SliverToBoxAdapter(child: SizedBox(height: 50)),
               ],
             ),
@@ -130,8 +100,6 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  // --- COMPOSANTS DE L'INTERFACE ---
 
   Widget _glow(Color c) => Container(
     width: 300, height: 300, 
@@ -149,17 +117,12 @@ class HomeScreen extends StatelessWidget {
         final data = snapshot.data?.data() as Map<String, dynamic>?;
         bool isAdmin = data?['isAdmin'] ?? false;
         String? photo = data?['photoUrl'] ?? user?.photoURL;
-
         return GestureDetector(
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())),
-          // Appui long secret pour les Admins
           onLongPress: isAdmin ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminDashboardScreen())) : null,
           child: Container(
             padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle, 
-              gradient: LinearGradient(colors: [AppColors.primaryPurple, AppColors.accentYellow])
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.primaryPurple, AppColors.accentYellow])),
             child: CircleAvatar(
               radius: 18, backgroundColor: Colors.black,
               backgroundImage: NetworkImage(photo ?? "https://ui-avatars.com/api/?name=${data?['username'] ?? 'W'}&background=6200EE&color=fff"),
@@ -188,11 +151,11 @@ class HomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("CRÉDITS WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const Text("SOLDE WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                   const SizedBox(height: 5),
-                  Text("$pts", style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900)),
+                  Text("$pts", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
                 ]),
-                const Icon(FontAwesomeIcons.bolt, color: AppColors.accentYellow, size: 24),
+                const Icon(FontAwesomeIcons.boltLightning, color: AppColors.accentYellow, size: 24),
               ],
             ),
           ),
@@ -201,6 +164,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // --- CORRECTION DYNAMIC POUR ÉVITER L'ERREUR GC2F972A8 ---
   Widget _buildAdCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -214,7 +178,7 @@ class HomeScreen extends StatelessWidget {
             border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3))
           ),
           child: const Row(children: [
-            Icon(Icons.play_circle_fill, color: Colors.blueAccent),
+            Icon(Icons.play_circle_fill, color: Colors.blueAccent), // Icône standard
             SizedBox(width: 15),
             Text("REGARDER UNE VIDÉO (+15 PTS)", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
           ]),
@@ -236,7 +200,7 @@ class HomeScreen extends StatelessWidget {
             border: Border.all(color: Colors.amber.withValues(alpha: 0.3))
           ),
           child: const Row(children: [
-            Icon(FontAwesomeIcons.gift, color: Colors.amber, size: 18),
+            Icon(Icons.card_giftcard, color: Colors.amber), // Icône standard
             SizedBox(width: 15),
             Text("TIRAGE AU SORT MENSUEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
             Spacer(),
