@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class DlsCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final dynamic icon; // Dynamic pour accepter FaIconData
+  final dynamic icon; 
   final Color color;
   final String rating;
   final VoidCallback onTap;
