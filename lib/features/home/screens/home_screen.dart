@@ -56,7 +56,15 @@ class HomeScreen extends StatelessWidget {
                       childAspectRatio: aspectRatio,
                     ),
                     delegate: SliverChildListDelegate([
-                      DlsCard(title: "L'ARÈNE", subtitle: "GLORY", rating: "98", icon: FontAwesomeIcons.bolt, color: Colors.amber, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryPickerScreen()))),
+                      DlsCard(
+  title: "L'ARÈNE", 
+  subtitle: "GLORY MODE", 
+  rating: "98", 
+  icon: FontAwesomeIcons.boltLightning, 
+  color: Colors.amber,
+  // ON REBRANCHE SUR LE MENU COMPLET ✅
+  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArenaMenuScreen())),
+),
                       DlsCard(title: "LE BAZAR", subtitle: "ITEMS", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))),
                       DlsCard(title: "LE SALON", subtitle: "CHAT", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))),
                       DlsCard(title: "LE GÉNIE", subtitle: "AI", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()))),
