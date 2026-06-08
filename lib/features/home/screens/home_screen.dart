@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:wizzy/core/constants/app_colors.dart';
 import 'package:wizzy/shared/widgets/dls_card.dart';
-import 'package:wizzy/features/home/screens/category_picker_screen.dart';
+import 'package:wizzy/features/quiz/screens/arena_menu_screen.dart';
 import 'package:wizzy/features/marketplace/screens/marketplace_screen.dart';
 import 'package:wizzy/features/messenger/screens/users_list_screen.dart';
 import 'package:wizzy/features/ai_assistant/screens/ai_chat_screen.dart';
@@ -47,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SliverToBoxAdapter(child: _buildPointsBanner(user?.uid ?? "")),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: const EdgeInsets.all(24),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
@@ -57,17 +56,25 @@ class HomeScreen extends StatelessWidget {
                     ),
                     delegate: SliverChildListDelegate([
                       DlsCard(
-  title: "L'ARÈNE", 
-  subtitle: "GLORY MODE", 
-  rating: "98", 
-  icon: FontAwesomeIcons.boltLightning, 
-  color: Colors.amber,
-  // ON REBRANCHE SUR LE MENU COMPLET ✅
-  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArenaMenuScreen())),
-),
-                      DlsCard(title: "LE BAZAR", subtitle: "ITEMS", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))),
-                      DlsCard(title: "LE SALON", subtitle: "CHAT", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))),
-                      DlsCard(title: "LE GÉNIE", subtitle: "AI", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()))),
+                        title: "L'ARÈNE", subtitle: "GLORY MODE", rating: "98", 
+                        icon: FontAwesomeIcons.boltLightning, color: Colors.amber, 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArenaMenuScreen()))
+                      ),
+                      DlsCard(
+                        title: "LE BAZAR", subtitle: "MARKETPLACE", rating: "94", 
+                        icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))
+                      ),
+                      DlsCard(
+                        title: "LE SALON", subtitle: "SOCIAL HUB", rating: "88", 
+                        icon: FontAwesomeIcons.comments, color: Colors.greenAccent, 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))
+                      ),
+                      DlsCard(
+                        title: "LE GÉNIE", subtitle: "IA WIZZY", rating: "99", 
+                        icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, 
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()))
+                      ),
                     ]),
                   ),
                 ),
@@ -115,11 +122,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Container(
             padding: const EdgeInsets.all(25),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05), 
-              borderRadius: BorderRadius.circular(28), 
-              border: Border.all(color: Colors.white10)
-            ),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(28), border: Border.all(color: Colors.white10)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -127,7 +130,7 @@ class HomeScreen extends StatelessWidget {
                   const Text("SOLDE WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10)),
                   Text("$pts PTS", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
                 ]),
-                const Icon(Icons.bolt, color: AppColors.accentYellow, size: 24), // Utilisation Icon Material
+                const Icon(Icons.bolt, color: AppColors.accentYellow, size: 24),
               ],
             ),
           ),
@@ -143,16 +146,8 @@ class HomeScreen extends StatelessWidget {
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdPlayerScreen())),
         child: Container(
           width: double.infinity, padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.blueAccent.withValues(alpha: 0.2), Colors.transparent]), 
-            borderRadius: BorderRadius.circular(24), 
-            border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3))
-          ),
-          child: const Row(children: [
-            Icon(Icons.play_circle_fill, color: Colors.blueAccent), 
-            SizedBox(width: 15), 
-            Text("VIDÉO (+15 PTS)", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-          ]),
+          decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.blueAccent.withValues(alpha: 0.2), Colors.transparent]), borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3))),
+          child: const Row(children: [Icon(Icons.play_circle_fill, color: Colors.blueAccent), SizedBox(width: 15), Text("VIDÉO (+15 PTS)", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]),
         ),
       ),
     );
@@ -165,16 +160,8 @@ class HomeScreen extends StatelessWidget {
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LuckyDrawScreen())),
         child: Container(
           width: double.infinity, padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.amber.withValues(alpha: 0.2), Colors.transparent]), 
-            borderRadius: BorderRadius.circular(24), 
-            border: Border.all(color: Colors.amber.withValues(alpha: 0.3))
-          ),
-          child: const Row(children: [
-            Icon(Icons.card_giftcard, color: Colors.amber), 
-            SizedBox(width: 15), 
-            Text("TIRAGE MENSUEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-          ]),
+          decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.amber.withValues(alpha: 0.2), Colors.transparent]), borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.amber.withValues(alpha: 0.3))),
+          child: const Row(children: [Icon(Icons.card_giftcard, color: Colors.amber), SizedBox(width: 15), Text("TIRAGE MENSUEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]),
         ),
       ),
     );
