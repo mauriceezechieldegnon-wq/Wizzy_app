@@ -10,45 +10,35 @@ class AdPlayerScreen extends StatefulWidget {
 }
 
 class _AdPlayerScreenState extends State<AdPlayerScreen> {
-  int _secondsLeft = 15;
-  late Timer _timer;
+  int _timer = 15;
+  bool _finished = false;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_secondsLeft > 0) {
-        setState(() => _secondsLeft--);
-      } else {
-        _timer.cancel();
-        _grantReward();
-      }
+    Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_timer > 0) { setState(() => _timer--); } 
+      else { t.cancel(); setState(() => _finished = true); _reward(); }
     });
   }
 
-  void _grantReward() async {
+  void _reward() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'points': FieldValue.increment(15),
-    });
-    if (mounted) Navigator.pop(context, true);
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({'points': FieldValue.increment(15)});
   }
-
-  @override
-  void dispose() { _timer.cancel(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(backgroundColor: Colors.transparent, leading: IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.pop(context))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.play_circle_fill, size: 80, color: Colors.blueAccent),
+            const Icon(Icons.play_circle, size: 100, color: Colors.blue),
             const SizedBox(height: 20),
-            const Text("PUBLICITÉ EN COURS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            Text("Récompense dans $_secondsLeft secondes...", style: const TextStyle(color: Colors.white54)),
+            Text(_finished ? "RÉCOMPENSE ACQUISE ! ✅" : "Patiente encore $_timer s", style: const TextStyle(color: Colors.white)),
           ],
         ),
       ),
