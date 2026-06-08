@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:io';
 
-// --- IMPORTS FIXES ---
 import 'package:wizzy/core/constants/app_colors.dart';
 import 'package:wizzy/shared/widgets/dls_card.dart';
 import 'package:wizzy/features/home/screens/category_picker_screen.dart';
@@ -42,21 +39,15 @@ class HomeScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("WIZZY", style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -1)),
+                        const Text("WIZZY", style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
                         _userAvatar(context, user),
                       ],
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(child: _buildPointsBanner(user?.uid ?? "")),
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 24, top: 30, bottom: 15),
-                    child: Text("SÉLECTION ÉLITE", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2)),
-                  ),
-                ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
@@ -65,31 +56,13 @@ class HomeScreen extends StatelessWidget {
                       childAspectRatio: aspectRatio,
                     ),
                     delegate: SliverChildListDelegate([
-                      // PAS DE CONST ICI ✅
-                      DlsCard(
-                        title: "L'ARÈNE", subtitle: "MODE GLORE", rating: "98", 
-                        icon: FontAwesomeIcons.boltLightning, color: Colors.amber,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryPickerScreen())),
-                      ),
-                      DlsCard(
-                        title: "LE BAZAR", subtitle: "MARKETPLACE", rating: "94", 
-                        icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen())),
-                      ),
-                      DlsCard(
-                        title: "LE SALON", subtitle: "MESSENGER", rating: "88", 
-                        icon: FontAwesomeIcons.comments, color: Colors.greenAccent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen())),
-                      ),
-                      DlsCard(
-                        title: "LE GÉNIE", subtitle: "IA WIZZY", rating: "99", 
-                        icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen())),
-                      ),
+                      DlsCard(title: "L'ARÈNE", subtitle: "GLORY", rating: "98", icon: FontAwesomeIcons.bolt, color: Colors.amber, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryPickerScreen()))),
+                      DlsCard(title: "LE BAZAR", subtitle: "ITEMS", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))),
+                      DlsCard(title: "LE SALON", subtitle: "CHAT", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))),
+                      DlsCard(title: "LE GÉNIE", subtitle: "AI", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()))),
                     ]),
                   ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 30)),
                 SliverToBoxAdapter(child: _buildAdCard(context)),
                 SliverToBoxAdapter(child: _buildLuckyDrawCard(context)),
                 const SliverToBoxAdapter(child: SizedBox(height: 50)),
@@ -103,11 +76,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _glow(Color c) => Container(
     width: 300, height: 300, 
-    decoration: BoxDecoration(
-      shape: BoxShape.circle, 
-      color: c.withValues(alpha: 0.15), 
-      boxShadow: [BoxShadow(color: c.withValues(alpha: 0.1), blurRadius: 100, spreadRadius: 50)]
-    )
+    decoration: BoxDecoration(shape: BoxShape.circle, color: c.withValues(alpha: 0.15), boxShadow: [BoxShadow(color: c.withValues(alpha: 0.1), blurRadius: 100)])
   );
 
   Widget _userAvatar(BuildContext context, User? user) {
@@ -120,13 +89,9 @@ class HomeScreen extends StatelessWidget {
         return GestureDetector(
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())),
           onLongPress: isAdmin ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminDashboardScreen())) : null,
-          child: Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.primaryPurple, AppColors.accentYellow])),
-            child: CircleAvatar(
-              radius: 18, backgroundColor: Colors.black,
-              backgroundImage: NetworkImage(photo ?? "https://ui-avatars.com/api/?name=${data?['username'] ?? 'W'}&background=6200EE&color=fff"),
-            ),
+          child: CircleAvatar(
+            radius: 18, backgroundColor: Colors.black, 
+            backgroundImage: NetworkImage(photo ?? "https://ui-avatars.com/api/?name=W")
           ),
         );
       },
@@ -143,19 +108,18 @@ class HomeScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(25),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white10),
+              color: Colors.white.withValues(alpha: 0.05), 
+              borderRadius: BorderRadius.circular(28), 
+              border: Border.all(color: Colors.white10)
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("SOLDE WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 5),
-                  Text("$pts", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
+                  const Text("SOLDE WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10)),
+                  Text("$pts PTS", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
                 ]),
-                const Icon(FontAwesomeIcons.boltLightning, color: AppColors.accentYellow, size: 24),
+                const Icon(Icons.bolt, color: AppColors.accentYellow, size: 24), // Utilisation Icon Material
               ],
             ),
           ),
@@ -164,7 +128,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // --- CORRECTION DYNAMIC POUR ÉVITER L'ERREUR GC2F972A8 ---
   Widget _buildAdCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -173,14 +136,14 @@ class HomeScreen extends StatelessWidget {
         child: Container(
           width: double.infinity, padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.blueAccent.withValues(alpha: 0.2), Colors.transparent]),
+            gradient: LinearGradient(colors: [Colors.blueAccent.withValues(alpha: 0.2), Colors.transparent]), 
             borderRadius: BorderRadius.circular(24), 
             border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3))
           ),
           child: const Row(children: [
-            Icon(Icons.play_circle_fill, color: Colors.blueAccent), // Icône standard
-            SizedBox(width: 15),
-            Text("REGARDER UNE VIDÉO (+15 PTS)", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            Icon(Icons.play_circle_fill, color: Colors.blueAccent), 
+            SizedBox(width: 15), 
+            Text("VIDÉO (+15 PTS)", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
           ]),
         ),
       ),
@@ -195,16 +158,14 @@ class HomeScreen extends StatelessWidget {
         child: Container(
           width: double.infinity, padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.amber.withValues(alpha: 0.2), Colors.transparent]),
+            gradient: LinearGradient(colors: [Colors.amber.withValues(alpha: 0.2), Colors.transparent]), 
             borderRadius: BorderRadius.circular(24), 
             border: Border.all(color: Colors.amber.withValues(alpha: 0.3))
           ),
           child: const Row(children: [
-            Icon(Icons.card_giftcard, color: Colors.amber), // Icône standard
-            SizedBox(width: 15),
-            Text("TIRAGE AU SORT MENSUEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-            Spacer(),
-            Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 12),
+            Icon(Icons.card_giftcard, color: Colors.amber), 
+            SizedBox(width: 15), 
+            Text("TIRAGE MENSUEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
           ]),
         ),
       ),
