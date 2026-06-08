@@ -41,7 +41,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple, minimumSize: const Size(double.infinity, 50)),
                   child: const Text("SAUVEGARDER"),
                 ),
-                TextButton(onPressed: () => FirebaseAuth.instance.sendPasswordResetEmail(email: user!.email!), child: const Text("Changer mot de passe", style: TextStyle(color: AppColors.accentYellow))),
+                TextButton(
+  onPressed: () async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: user!.email!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email de réinitialisation envoyé ! Vérifie tes mails 📧"), backgroundColor: Colors.blue)
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur : $e"), backgroundColor: Colors.red)
+      );
+    }
+  },
+  child: const Text("Changer mot de passe", style: TextStyle(color: AppColors.accentYellow)),
+),
                 TextButton(onPressed: () { FirebaseAuth.instance.signOut(); Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false); }, child: const Text("Déconnexion", style: TextStyle(color: Colors.red))),
               ],
             ),
