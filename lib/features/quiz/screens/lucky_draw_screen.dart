@@ -32,11 +32,24 @@ class LuckyDrawScreen extends StatelessWidget {
           // RÈGLE : Il faut au moins 1000 points pour être qualifié
           bool isQualified = points >= 1000; 
 
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const Spacer(),
+         // Dans le build du LuckyDrawScreen, remplace le Padding par celui-ci :
+return Padding(
+  padding: const EdgeInsets.all(24.0),
+  child: SizedBox.expand( // Prend toute la place pour centrer
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center, // CENTRE VERTICALEMENT ✅
+      crossAxisAlignment: CrossAxisAlignment.center, // CENTRE HORIZONTALEMENT ✅
+      children: [
+        const Text("TIRAGE MENSUEL", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 2)),
+        const SizedBox(height: 40),
+        _buildStatusIcon(hasPaid, isQualified),
+        const SizedBox(height: 30),
+        Text(
+          hasPaid ? "TICKET VALIDÉ ✅" : (isQualified ? "TU ES QUALIFIÉ !" : "PAS ENCORE QUALIFIÉ"),
+          textAlign: TextAlign.center,
+          style: TextStyle(color: hasPaid ? Colors.greenAccent : AppColors.accentYellow, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+       
                 
                 // --- ICÔNE DE STATUT DYNAMIQUE ---
                 _buildStatusIcon(hasPaid, isQualified),
