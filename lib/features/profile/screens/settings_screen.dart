@@ -10,35 +10,46 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final _nameController = TextEditingController();
-  final _whatsappController = TextEditingController();
   final user = FirebaseAuth.instance.currentUser;
-
-  void _save() async {
-    await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
-      'username': _nameController.text.trim(),
-      'whatsapp': _whatsappController.text.trim(),
-    });
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("OK !")));
-  }
+  final nC = TextEditingController();
+  final wC = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
-      appBar: AppBar(backgroundColor: Colors.transparent, title: const Text("SETTINGS")),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            TextField(controller: _nameController, style: const TextStyle(color: Colors.white)),
-            TextField(controller: _whatsappController, style: const TextStyle(color: Colors.white)),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _save, child: const Text("SAUVEGARDER")),
-          ],
-        ),
+      appBar: AppBar(backgroundColor: Colors.transparent, title: const Text("MON PROFIL")),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance.collection('users').doc(user!.uid).snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          var data = snapshot.data!.data() as Map<String, dynamic>;
+          nC.text = data['username'] ?? "";
+          wC.text = data['whatsapp'] ?? "";
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                CircleAvatar(radius: 50, backgroundImage: NetworkImage(data['photoUrl'] ?? "")),
+                const SizedBox(height: 30),
+                _field("Pseudo", nC),
+                _field("WhatsApp", wC),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () => FirebaseFirestore.instance.collection('users').doc(user!.uid).update({'username': nC.text, 'whatsapp': wC.text}),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple, minimumSize: const Size(double.infinity, 50)),
+                  child: const Text("SAUVEGARDER"),
+                ),
+                TextButton(onPressed: () => FirebaseAuth.instance.sendPasswordResetEmail(email: user!.email!), child: const Text("Changer mot de passe", style: TextStyle(color: AppColors.accentYellow))),
+                TextButton(onPressed: () { FirebaseAuth.instance.signOut(); Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false); }, child: const Text("Déconnexion", style: TextStyle(color: Colors.red))),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
+
+  Widget _field(String l, TextEditingController c) => Padding(padding: const EdgeInsets.only(bottom: 15), child: TextField(controller: c, decoration: InputDecoration(labelText: l, filled: true, fillColor: Colors.white.withValues(alpha: 0.05))));
 }
