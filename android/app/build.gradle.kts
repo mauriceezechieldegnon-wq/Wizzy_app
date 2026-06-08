@@ -6,9 +6,21 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.reader(Charsets.UTF_8).use { reader ->
+        localProperties.load(reader)
+    }
+}
+
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
+
 android {
     namespace = "com.dem.wizzy"
-    compileSdk = 34
+    // --- CORRECTION : PASSAGE AU SDK 36 ---
+    compileSdk = 36 
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -22,10 +34,26 @@ android {
 
     defaultConfig {
         applicationId = "com.dem.wizzy"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 23 
+        // --- CORRECTION : CIBLE LE SDK 36 ---
+        targetSdk = 36 
+        versionCode = flutterVersionCode.toInt()
+        versionName = flutterVersionName
         multiDexEnabled = true
     }
+
+    buildTypes {
+        getByName("release") {
+            // Utilisation du signing de debug pour que l'APK soit installable immédiatement
+            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+}
+
+flutter {
+    source = "../.."
 }
 
 dependencies {
