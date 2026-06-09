@@ -21,7 +21,18 @@ class ArenaMenuScreen extends StatelessWidget {
           children: [
             const Text("L'ARÈNE", style: TextStyle(color: AppColors.accentYellow, fontSize: 36, fontWeight: FontWeight.w900)),
             const SizedBox(height: 40),
-            _buildArenaOption(context, title: "ENTRAÎNEMENT SOLO", subtitle: "Gagne des points", icon: FontAwesomeIcons.user, color: Colors.blueAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const QuizScreen(category: "CULTURE G")))),
+            _buildArenaOption(
+  context,
+  title: "ENTRAÎNEMENT SOLO",
+  subtitle: "Gagne des points",
+  icon: FontAwesomeIcons.user,
+  color: Colors.blueAccent,
+  // CORRECTION : On pointe vers le Picker de catégories ✅
+  onTap: () => Navigator.push(
+    context, 
+    MaterialPageRoute(builder: (context) => const CategoryPickerScreen())
+  ),
+),
             const SizedBox(height: 20),
             _buildArenaOption(context, title: "DUEL À PARIS", subtitle: "Mise tes points", icon: FontAwesomeIcons.bolt, color: AppColors.primaryPurple, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MatchmakingScreen()))),
             const SizedBox(height: 20),
