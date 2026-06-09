@@ -1,24 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:wizzy/core/constants/app_colors.dart';
 
 class QuizResultScreen extends StatefulWidget {
   final int score;
   final int totalQuestions;
-  const QuizResultScreen({super.key, required this.score, required this.totalQuestions});
+  final bool isTournament;
+  final int? rank;
+
+  const QuizResultScreen({
+    super.key,
+    required this.score,
+    required this.totalQuestions,
+    this.isTournament = false,
+    this.rank,
+  });
 
   @override
   State<QuizResultScreen> createState() => _QuizResultScreenState();
 }
 
 class _QuizResultScreenState extends State<QuizResultScreen> {
-  late ConfettiController _controller;
+  late ConfettiController _confettiController;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
-    _controller = ConfettiController(duration: const Duration(seconds: 3));
-    _controller.play();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    
+    // Déclenchement de la fête si le score est positif
+    if (widget.score > 0) {
+      _confettiController.play();
+      _playWinSound();
+    }
+  }
+
+  void _playWinSound() async {
+    try {
+      await _audioPlayer.play(AssetSource('sounds/success.mp3'));
+    } catch (e) {
+      debugPrint("Son non chargé");
+    }
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  // LOGIQUE DES BADGES BASÉE SUR LE POURCENTAGE RÉEL
+  Widget _buildBadge() {
+    String label = "DÉBUTANT 🥉";
+    Color col = Colors.white24;
+    
+    int maxPoints = widget.totalQuestions * 10;
+    double percentage = maxPoints > 0 ? (widget.score / maxPoints) * 100 : 0;
+
+    if (percentage >= 90) {
+      label = "LÉGENDE 👑";
+      col = Colors.amber;
+    } else if (percentage >= 70) {
+      label = "EXPERT 🥇";
+      col = Colors.blueAccent;
+    } else if (percentage >= 40) {
+      label = "PRO 🥈";
+      col = Colors.purpleAccent;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+      decoration: BoxDecoration(
+        color: col.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: col.withValues(alpha: 0.5), width: 2),
+      ),
+      child: Text(
+        label, 
+        style: TextStyle(color: col, fontWeight: FontWeight.w900, letterSpacing: 2)
+      ),
+    );
   }
 
   @override
@@ -26,32 +90,56 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF09090B),
       body: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(confettiController: _controller, blastDirectionality: BlastDirectionality.explosive),
+          // Widget Confetti
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            colors: const [Colors.amber, Colors.purple, Colors.blue],
           ),
-          // ON CENTRE TOUT LE CONTENU ICI ✅
+          
+          // Contenu centré
           SizedBox.expand(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Centrage vertical
-              crossAxisAlignment: CrossAxisAlignment.center, // Centrage horizontal
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text("SCORE FINAL", style: TextStyle(color: Colors.white38, letterSpacing: 2)),
+                Text(
+                  widget.isTournament ? "RÉSULTAT TOURNOI" : "SESSION TERMINÉE",
+                  style: const TextStyle(color: Colors.white38, letterSpacing: 3, fontWeight: FontWeight.bold, fontSize: 12),
+                ),
                 const SizedBox(height: 10),
-                Text("${widget.score} PTS", 
-                  style: const TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 20),
-                _buildBadge(), // Ton badge de rang
-                const SizedBox(height: 60),
+                
+                if (widget.isTournament && widget.rank != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text("RANG #${widget.rank}", 
+                      style: const TextStyle(color: AppColors.accentYellow, fontSize: 40, fontWeight: FontWeight.w900)),
+                  ),
+                
+                Text(
+                  "${widget.score} PTS", 
+                  style: const TextStyle(color: Colors.white, fontSize: 72, fontWeight: FontWeight.w900)
+                ),
+                
+                const SizedBox(height: 30),
+                _buildBadge(),
+                
+                const SizedBox(height: 80),
+                
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryPurple,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
-                  child: const Text("RETOUR DASHBOARD", style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "RETOUR AU MENU", 
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                  ),
                 ),
               ],
             ),
@@ -60,38 +148,4 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
       ),
     );
   }
-
-  // Remplace la fonction _buildBadge dans quiz_result_screen.dart
-Widget _buildBadge() {
-  String label = "NOVICE";
-  Color col = Colors.grey;
-  
-  // Score maximum possible
-  int maxPoints = widget.totalQuestions * 10;
-  // Pourcentage de réussite
-  double percentage = (widget.score / maxPoints) * 100;
-
-  if (percentage >= 90) {
-    label = "LÉGENDE 👑";
-    col = Colors.amber;
-  } else if (percentage >= 70) {
-    label = "EXPERT 🥇";
-    col = Colors.blueAccent;
-  } else if (percentage >= 50) {
-    label = "PRO 🥈";
-    col = Colors.purpleAccent;
-  } else {
-    label = "DÉBUTANT 🥉";
-    col = Colors.white38;
-  }
-
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-    decoration: BoxDecoration(
-      color: col.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(30),
-      border: Border.all(color: col.withValues(alpha: 0.5), width: 2),
-    ),
-    child: Text(label, style: TextStyle(color: col, fontWeight: FontWeight.w900, letterSpacing: 2)),
-  );
 }
