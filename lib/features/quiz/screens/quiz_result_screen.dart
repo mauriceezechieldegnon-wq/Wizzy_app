@@ -61,15 +61,37 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
     );
   }
 
-  Widget _buildBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.accentYellow.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.accentYellow.withValues(alpha: 0.5)),
-      ),
-      child: const Text("🥇 RANG EXPERT", style: TextStyle(color: AppColors.accentYellow, fontWeight: FontWeight.bold)),
-    );
+  // Remplace la fonction _buildBadge dans quiz_result_screen.dart
+Widget _buildBadge() {
+  String label = "NOVICE";
+  Color col = Colors.grey;
+  
+  // Score maximum possible
+  int maxPoints = widget.totalQuestions * 10;
+  // Pourcentage de réussite
+  double percentage = (widget.score / maxPoints) * 100;
+
+  if (percentage >= 90) {
+    label = "LÉGENDE 👑";
+    col = Colors.amber;
+  } else if (percentage >= 70) {
+    label = "EXPERT 🥇";
+    col = Colors.blueAccent;
+  } else if (percentage >= 50) {
+    label = "PRO 🥈";
+    col = Colors.purpleAccent;
+  } else {
+    label = "DÉBUTANT 🥉";
+    col = Colors.white38;
   }
+
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+    decoration: BoxDecoration(
+      color: col.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(30),
+      border: Border.all(color: col.withValues(alpha: 0.5), width: 2),
+    ),
+    child: Text(label, style: TextStyle(color: col, fontWeight: FontWeight.w900, letterSpacing: 2)),
+  );
 }
