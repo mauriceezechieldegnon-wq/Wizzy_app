@@ -29,7 +29,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
     try {
       // FIX TECHNIQUE : On utilise 'gemini-1.5-flash' sans rien d'autre
       final model = GenerativeModel(
-        model: 'gemini-1.5-flash', 
+        model: 'gemini-pro', 
         apiKey: _apiKey,
       );
 
