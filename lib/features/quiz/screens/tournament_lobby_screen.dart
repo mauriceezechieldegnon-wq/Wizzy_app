@@ -17,12 +17,26 @@ class _TournamentLobbyScreenState extends State<TournamentLobbyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        // AJOUT DU BOUTON BACK ✅
+        leading: const BackButton(color: Colors.white),
+        title: const Text("LOBBY TOURNOI", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+      ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection('tournaments').doc(tourneyId).snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          // GESTION DU CHARGEMENT (Évite l'écran gris)
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return const Center(child: Text("Tournoi introuvable. Crée 'battle_royale_01' dans Firestore.", style: TextStyle(color: Colors.white38)));
+          }
+
           var data = snapshot.data!.data() as Map<String, dynamic>;
-          int count = (data['players'] as List).length;
+          List players = data['players'] ?? [];
+          int count = players.length;
           
           if (data['status'] == 'starting') {
             WidgetsBinding.instance.addPostFrameCallback((_) {
