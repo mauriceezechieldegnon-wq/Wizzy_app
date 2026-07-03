@@ -23,8 +23,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
     _controller.clear();
 
     try {
-      // APPEL HTTP DIRECT : On force la version V1 (Stable)
-      final url = Uri.parse("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$_apiKey");
+      // CHANGE L'URL PAR CELLE-CI (Note le v1beta) :
+final url = Uri.parse("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_key");
       final response = await http.post(url, headers: {'Content-Type': 'application/json'},
         body: jsonEncode({"contents": [{"parts": [{"text": userText}]}]}));
 
