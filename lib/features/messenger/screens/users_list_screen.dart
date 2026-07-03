@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wizzy/core/constants/app_colors.dart';
+import 'package:wizzy/features/messenger/models/message_model.dart'; // <--- IMPORT MANQUANT AJOUTÉ ✅
 import 'package:wizzy/features/messenger/screens/chat_screen.dart';
 
 class UsersListScreen extends StatefulWidget {
@@ -20,9 +21,14 @@ class _UsersListScreenState extends State<UsersListScreen> {
       backgroundColor: AppColors.backgroundBlack,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
         title: TextField(
           style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(hintText: "Rechercher...", hintStyle: TextStyle(color: Colors.white24), border: InputBorder.none),
+          decoration: const InputDecoration(
+            hintText: "Chercher un champion...", 
+            hintStyle: TextStyle(color: Colors.white24), 
+            border: InputBorder.none
+          ),
           onChanged: (v) => setState(() => searchQuery = v.toLowerCase()),
         ),
       ),
@@ -30,6 +36,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         stream: FirebaseFirestore.instance.collection('users').snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          
           final users = snapshot.data!.docs.where((doc) {
             final name = (doc.data() as Map<String, dynamic>)['username'].toString().toLowerCase();
             return doc.id != currentId && name.contains(searchQuery);
@@ -41,7 +48,11 @@ class _UsersListScreenState extends State<UsersListScreen> {
             itemBuilder: (context, index) {
               final userData = users[index].data() as Map<String, dynamic>;
               final String otherId = users[index].id;
-              final String chatId = currentId.hashCode <= otherId.hashCode ? "${currentId}_$otherId" : "${otherId}_$currentId";
+              
+              // Génération de l'ID de chat unique
+              final String chatId = currentId.hashCode <= otherId.hashCode 
+                  ? "${currentId}_$otherId" 
+                  : "${otherId}_$currentId";
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -51,24 +62,44 @@ class _UsersListScreenState extends State<UsersListScreen> {
                   border: Border.all(color: Colors.white10),
                 ),
                 child: ListTile(
-                  leading: CircleAvatar(backgroundImage: NetworkImage(userData['photoUrl'] ?? "https://ui-avatars.com/api/?name=${userData['username']}")),
-                  title: Text(userData['username'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(
+                      userData['photoUrl'] ?? "https://ui-avatars.com/api/?name=${userData['username']}"
+                    )
+                  ),
+                  title: Text(
+                    userData['username'] ?? "Joueur", 
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                  ),
                   // --- BADGE DE MESSAGES NON LUS ---
                   trailing: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance.collection('chats').doc(chatId).collection('messages')
+                    stream: FirebaseFirestore.instance
+                        .collection('chats')
+                        .doc(chatId)
+                        .collection('messages')
                         .where('senderId', isEqualTo: otherId)
-                        .where('status', isNotEqualTo: MessageStatus.read.toString())
+                        .where('status', isNotEqualTo: MessageStatus.read.toString()) // Utilise l'import ajouté
                         .snapshots(),
                     builder: (context, msgSnap) {
-                      if (!msgSnap.hasData || msgSnap.data!.docs.isEmpty) return const Icon(Icons.chevron_right, color: Colors.white10);
+                      if (!msgSnap.hasData || msgSnap.data!.docs.isEmpty) {
+                        return const Icon(Icons.chevron_right, color: Colors.white10);
+                      }
                       return Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                        child: Text("${msgSnap.data!.docs.length}", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          "${msgSnap.data!.docs.length}", 
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)
+                        ),
                       );
                     },
                   ),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(receiverId: otherId, receiverName: userData['username']))),
+                  onTap: () => Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(receiverId: otherId, receiverName: userData['username'])
+                    )
+                  ),
                 ),
               );
             },
@@ -78,4 +109,3 @@ class _UsersListScreenState extends State<UsersListScreen> {
     );
   }
 }
-
