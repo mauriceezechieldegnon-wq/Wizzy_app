@@ -41,26 +41,14 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-          
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Enable Windows Desktop
+      - run: flutter pub get
+      - name: Enable Windows
         run: flutter config --enable-windows-desktop
-
-      # --- ÉTAPE MAGIQUE : PATCH DU FICHIER CMAKE ---
-      - name: Patch CMake Policy
-        shell: pwsh
-        run: |
-          $cmakeFile = "windows/CMakeLists.txt"
-          if (Test-Path $cmakeFile) {
-            $content = Get-Content $cmakeFile
-            $newContent = @("cmake_policy(SET CMP0048 NEW)") + $content
-            $newContent | Set-Content $cmakeFile
-          }
-
+      
+      # --- LA COMMANDE QUI VA TOUT DÉBLOQUER ---
       - name: Build Windows Exe
-        run: flutter build windows --release
+        shell: bash
+        run: flutter build windows --release -t lib/main.dart -- -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
