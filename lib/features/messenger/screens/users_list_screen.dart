@@ -12,6 +12,7 @@ class UsersListScreen extends StatefulWidget {
 
 class _UsersListScreenState extends State<UsersListScreen> {
   String searchQuery = "";
+
   @override
   Widget build(BuildContext context) {
     final currentId = FirebaseAuth.instance.currentUser!.uid;
@@ -21,7 +22,7 @@ class _UsersListScreenState extends State<UsersListScreen> {
         backgroundColor: Colors.transparent,
         title: TextField(
           style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(hintText: "Chercher...", hintStyle: TextStyle(color: Colors.white24), border: InputBorder.none),
+          decoration: const InputDecoration(hintText: "Rechercher...", hintStyle: TextStyle(color: Colors.white24), border: InputBorder.none),
           onChanged: (v) => setState(() => searchQuery = v.toLowerCase()),
         ),
       ),
@@ -35,16 +36,39 @@ class _UsersListScreenState extends State<UsersListScreen> {
           }).toList();
 
           return ListView.builder(
-            itemCount: users.length, padding: const EdgeInsets.all(20),
+            itemCount: users.length,
+            padding: const EdgeInsets.all(20),
             itemBuilder: (context, index) {
               final userData = users[index].data() as Map<String, dynamic>;
+              final String otherId = users[index].id;
+              final String chatId = currentId.hashCode <= otherId.hashCode ? "${currentId}_$otherId" : "${otherId}_$currentId";
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.03),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white10),
+                ),
                 child: ListTile(
-                  leading: CircleAvatar(backgroundImage: NetworkImage(userData['photoUrl'] ?? "https://ui-avatars.com/api/?name=W")),
+                  leading: CircleAvatar(backgroundImage: NetworkImage(userData['photoUrl'] ?? "https://ui-avatars.com/api/?name=${userData['username']}")),
                   title: Text(userData['username'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(receiverId: users[index].id, receiverName: userData['username']))),
+                  // --- BADGE DE MESSAGES NON LUS ---
+                  trailing: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('chats').doc(chatId).collection('messages')
+                        .where('senderId', isEqualTo: otherId)
+                        .where('status', isNotEqualTo: MessageStatus.read.toString())
+                        .snapshots(),
+                    builder: (context, msgSnap) {
+                      if (!msgSnap.hasData || msgSnap.data!.docs.isEmpty) return const Icon(Icons.chevron_right, color: Colors.white10);
+                      return Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                        child: Text("${msgSnap.data!.docs.length}", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      );
+                    },
+                  ),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(receiverId: otherId, receiverName: userData['username']))),
                 ),
               );
             },
@@ -54,3 +78,4 @@ class _UsersListScreenState extends State<UsersListScreen> {
     );
   }
 }
+
