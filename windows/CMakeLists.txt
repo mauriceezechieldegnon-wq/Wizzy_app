@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 3.14)
 
-# FIX POUR AUDIOPLAYERS
+# 1. CORRECTIF POUR AUDIOPLAYERS (Indispensable sur GitHub)
 add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
+# 2. Politique de compatibilité pour Firebase
+cmake_policy(SET CMP0048 NEW)
 
 project(wizzy LANGUAGES CXX)
 
-# On inclut les outils Flutter AVANT de les utiliser
-set(FLUTTER_MANAGED_SOURCES "")
+set(BINARY_NAME "wizzy")
+
+# 3. Charger les réglages Flutter (C'est ici que 'apply_standard_settings' est créé)
 include(flutter/generated_plugins.cmake)
 
-set(BINARY_NAME "WIZZY")
-
+# 4. Définir l'exécutable
 add_executable(${BINARY_NAME}
   "main.cpp"
   "resource.h"
@@ -24,16 +27,16 @@ add_executable(${BINARY_NAME}
   ${FLUTTER_MANAGED_SOURCES}
 )
 
-# Appliquer les réglages standards
+# 5. Appliquer les réglages (Maintenant la commande est reconnue ✅)
 apply_standard_settings(${BINARY_NAME})
 
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
 
-# Configuration des dépendances
+# 6. Assemblage Flutter
 add_dependencies(${BINARY_NAME} flutter_assemble)
 
-# Liaison des plugins
+# 7. Liaison finale des plugins
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
   add_dependencies(${BINARY_NAME} ${plugin}_assemble)
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
