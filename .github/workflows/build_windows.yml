@@ -1,17 +1,45 @@
-build-windows:
+name: WIZZY Windows Build
+
+on:
+  push:
+    branches: [ "main" ] # Déclenchement sur ta branche principale
+  pull_request:
+    branches: [ "main" ]
+
+# Cette variable règle les avertissements de version de GitHub
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
     runs-on: windows-latest
+
     steps:
+      # 1. Récupération du code
       - uses: actions/checkout@v4
+
+      # 2. Installation de Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
-      - run: flutter pub get
-      - run: flutter config --enable-windows-desktop
-      - name: Build Windows Exe
-        # On utilise la commande la plus simple possible
+          cache: true # Accélère les builds suivants
+
+      # 3. Récupération des dépendances
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 4. Activation du support Desktop
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      # 5. Compilation du fichier .exe
+      # Note : On utilise la commande simple car on a mis le correctif 
+      # directement dans le fichier windows/CMakeLists.txt
+      - name: Build Windows
         run: flutter build windows --release
+
+      # 6. Création de l'artéfact (Le ZIP téléchargeable)
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
