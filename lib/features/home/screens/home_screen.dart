@@ -65,11 +65,38 @@ class HomeScreen extends StatelessWidget {
                         icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, 
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))
                       ),
-                      DlsCard(
-                        title: "LE SALON", subtitle: "SOCIAL HUB", rating: "88", 
-                        icon: FontAwesomeIcons.comments, color: Colors.greenAccent, 
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))
-                      ),
+                      Stack(
+  clipBehavior: Clip.none,
+  children: [
+    DlsCard(
+      title: "LE SALON", subtitle: "SOCIAL HUB", rating: "88", 
+      icon: FontAwesomeIcons.comments, color: Colors.greenAccent,
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen())),
+    ),
+    // --- COMPTEUR GLOBAL DYNAMIQUE ---
+    Positioned(
+      top: -5, right: -5,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instanceGroup('messages')
+            .where('status', isNotEqualTo: MessageStatus.read.toString())
+            .snapshots(),
+        builder: (context, globalSnap) {
+          if (!globalSnap.hasData) return const SizedBox();
+          // On ne compte que les messages où je ne suis PAS l'envoyeur
+          int total = globalSnap.data!.docs.where((d) => d['senderId'] != user?.uid).length;
+          if (total == 0) return const SizedBox();
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.black, width: 2)),
+            child: Text("$total", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+          );
+        },
+      ),
+    ),
+  ],
+),
+
+
                       DlsCard(
                         title: "LE GÉNIE", subtitle: "IA WIZZY", rating: "99", 
                         icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, 
