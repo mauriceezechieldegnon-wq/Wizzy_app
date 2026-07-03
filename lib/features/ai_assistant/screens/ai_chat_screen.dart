@@ -14,52 +14,29 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final List<Map<String, String>> _messages = [];
   bool _isLoading = false;
 
-  // TA CLÉ API
   final String _apiKey = "AQ.Ab8RN6LMTpfFjsGdivbHCm6Zf92qa_grInOUzYWApRuuF7JYtQ";
 
   Future<void> _sendMessage() async {
     if (_controller.text.trim().isEmpty || _isLoading) return;
-
     String userText = _controller.text;
-    setState(() {
-      _messages.add({"role": "user", "text": userText});
-      _isLoading = true;
-    });
+    setState(() { _messages.add({"role": "user", "text": userText}); _isLoading = true; });
     _controller.clear();
 
     try {
-      // APPEL DIRECT À L'API GOOGLE (FORCE LA VERSION V1 STABLE)
-      final url = Uri.parse(
-          "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$_apiKey");
-
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "contents": [
-            {
-              "parts": [{"text": userText}]
-            }
-          ]
-        }),
-      );
+      // APPEL HTTP DIRECT : On force la version V1 (Stable)
+      final url = Uri.parse("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$_apiKey");
+      final response = await http.post(url, headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"contents": [{"parts": [{"text": userText}]}]}));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final String aiResponse = data['candidates'][0]['content']['parts'][0]['text'];
-        
-        setState(() {
-          _messages.add({"role": "ai", "text": aiResponse});
-        });
+        final String text = data['candidates'][0]['content']['parts'][0]['text'];
+        setState(() { _messages.add({"role": "ai", "text": text}); });
       } else {
-        setState(() {
-          _messages.add({"role": "ai", "text": "Le Génie a un souci. (Code: ${response.statusCode})"});
-        });
+        setState(() { _messages.add({"role": "ai", "text": "Le Génie a un souci (Code: ${response.statusCode})"}); });
       }
     } catch (e) {
-      setState(() {
-        _messages.add({"role": "ai", "text": "Erreur de connexion internet."});
-      });
+      setState(() { _messages.add({"role": "ai", "text": "Erreur de connexion : $e"}); });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -69,12 +46,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent, 
-        elevation: 0,
-        title: const Text("GÉNIE WIZZY", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
-        leading: const BackButton(color: Colors.white),
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, title: const Text("GÉNIE WIZZY", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white))),
       body: Column(
         children: [
           Expanded(
@@ -89,41 +61,28 @@ class _AIChatScreenState extends State<AIChatScreen> {
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(16),
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-                    decoration: BoxDecoration(
-                      color: isMe ? AppColors.primaryPurple : Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                    decoration: BoxDecoration(color: isMe ? AppColors.primaryPurple : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20)),
                     child: Text(msg['text']!, style: const TextStyle(color: Colors.white)),
                   ),
                 );
               },
             ),
           ),
-          if (_isLoading) const LinearProgressIndicator(color: AppColors.accentYellow),
-          _buildInputArea(),
+          if (_isLoading) const LinearProgressIndicator(color: Colors.amber),
+          _buildInput(),
         ],
       ),
     );
   }
 
-  Widget _buildInputArea() {
+  Widget _buildInput() {
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.black,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller, 
-              onSubmitted: (_) => _sendMessage(),
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(hintText: "Pose ta question...", border: InputBorder.none)
-            )
-          ),
-          IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send, color: AppColors.accentYellow)),
-        ],
-      ),
+      child: Row(children: [
+        Expanded(child: TextField(controller: _controller, onSubmitted: (_) => _sendMessage(), style: const TextStyle(color: Colors.white), decoration: const InputDecoration(hintText: "Pose ta question...", border: InputBorder.none, hintStyle: TextStyle(color: Colors.white24)))),
+        IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send, color: Colors.amber)),
+      ]),
     );
   }
 }
