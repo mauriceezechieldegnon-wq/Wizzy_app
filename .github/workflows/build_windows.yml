@@ -1,4 +1,4 @@
-name: WIZZY Windows Build
+name: WIZZY Multi-Platform Build
 
 on:
   push:
@@ -6,36 +6,64 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  build:
-    runs-on: windows-latest
+  build-android:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
+      - run: flutter pub get
+      - run: flutter build apk --release --split-per-abi
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wizzy-android-apk
+          path: build/app/outputs/flutter-apk/*.apk
 
-      - name: Install Dependencies
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+          
+      - name: Install dependencies
         run: flutter pub get
 
       - name: Enable Windows Desktop
         run: flutter config --enable-windows-desktop
 
+      # --- ÉTAPE MAGIQUE : PATCH DU FICHIER CMAKE ---
+      - name: Patch CMake Policy
+        shell: pwsh
+        run: |
+          $cmakeFile = "windows/CMakeLists.txt"
+          if (Test-Path $cmakeFile) {
+            $content = Get-Content $cmakeFile
+            $newContent = @("cmake_policy(SET CMP0048 NEW)") + $content
+            $newContent | Set-Content $cmakeFile
+          }
+
       - name: Build Windows Exe
-        shell: bash
-        run: flutter build windows --release -- "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+        run: flutter build windows --release
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: wizzy-windows-exe
-          path: build/windows/x64/runner/Release/
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wizzy-windows-release
           path: build/windows/x64/runner/Release/
