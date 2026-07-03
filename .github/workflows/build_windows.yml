@@ -1,15 +1,4 @@
-name: WIZZY Multi-Platform Build
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-jobs:
-  build-windows:
+build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +10,8 @@ jobs:
       - run: flutter pub get
       - run: flutter config --enable-windows-desktop
       - name: Build Windows Exe
-        run: flutter build windows --release # COMMANDE SIMPLE ✅
+        # On utilise la commande la plus simple possible
+        run: flutter build windows --release
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
