@@ -1,3 +1,6 @@
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+cmake_minimum_required(VERSION 3.10)
+# ... reste du fichier
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
 project(wizzy LANGUAGES CXX)
