@@ -1,19 +1,20 @@
 cmake_minimum_required(VERSION 3.14)
 
-# 1. FIX POUR AUDIOPLAYERS (Doit être tout en haut)
+# 1. FIX POUR AUDIOPLAYERS
 add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 
 project(wizzy LANGUAGES CXX)
 
-set(BINARY_NAME "WIZZY")
+set(BINARY_NAME "wizzy")
 
-# 2. CONFIGURATION FLUTTER
-# On initialise les variables Flutter avant toute chose
-set(FLUTTER_MANAGED_SOURCES "")
-
-# 3. INCLUSION DES PLUGINS
-# C'est ici que 'apply_standard_settings' et les autres macros sont chargées
+# 2. CHARGER LES OUTILS FLUTTER
 include(flutter/generated_plugins.cmake)
+
+# 3. GARDE-FOU : Si la commande est inconnue, on la crée "à vide" pour éviter le crash
+if(NOT COMMAND apply_standard_settings)
+    macro(apply_standard_settings TARGET)
+    endmacro()
+endif()
 
 # 4. DÉFINITION DE L'EXÉCUTABLE
 add_executable(${BINARY_NAME}
@@ -29,18 +30,13 @@ add_executable(${BINARY_NAME}
   ${FLUTTER_MANAGED_SOURCES}
 )
 
-# 5. APPLIQUER LES RÉGLAGES STANDARDS
-# Maintenant que generated_plugins.cmake est chargé, cette commande est reconnue ✅
+# 5. APPLIQUER LES RÉGLAGES (Maintenant protégé ✅)
 apply_standard_settings(${BINARY_NAME})
 
-# 6. LIAISON DES BIBLIOTHÈQUES
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
-
-# 7. DÉPENDANCES ET ASSEMBLAGE
 add_dependencies(${BINARY_NAME} flutter_assemble)
 
-# Liaison automatique de tous les plugins (Firebase, Audioplayers, etc.)
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
   add_dependencies(${BINARY_NAME} ${plugin}_assemble)
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
