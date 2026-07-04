@@ -1,88 +1,41 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:wizzy/core/constants/app_colors.dart';
+cmake_minimum_required(VERSION 3.14)
 
-class AIChatScreen extends StatefulWidget {
-  const AIChatScreen({super.key});
-  @override
-  State<AIChatScreen> createState() => _AIChatScreenState();
-}
+project(wizzy LANGUAGES CXX)
 
-class _AIChatScreenState extends State<AIChatScreen> {
-  final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> _messages = [];
-  bool _isLoading = false;
+# 1. FIX POUR AUDIOPLAYERS (Coroutine error)
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 
-  final String _apiKey = "AQ.Ab8RN6LMTpfFjsGdivbHCm6Zf92qa_grInOUzYWApRuuF7JYtQ";
+# 2. LE FIX MAGIQUE : On définit la commande qui manque au plugin
+macro(apply_standard_settings TARGET)
+    target_compile_features(${TARGET} PRIVATE cxx_std_17)
+endmacro()
 
-  Future<void> _sendMessage() async {
-    if (_controller.text.trim().isEmpty || _isLoading) return;
-    String userText = _controller.text;
-    setState(() { _messages.add({"role": "user", "text": userText}); _isLoading = true; });
-    _controller.clear();
+set(BINARY_NAME "wizzy")
 
-    try {
-// CHANGE L'URL PAR CELLE-CI (Note le v1beta) :
-final url = Uri.parse("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_key");
-      final response = await http.post(url, headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"contents": [{"parts": [{"text": userText}]}]}));
+# 3. CHARGER LES OUTILS FLUTTER
+include(flutter/generated_plugins.cmake)
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final String text = data['candidates'][0]['content']['parts'][0]['text'];
-        setState(() { _messages.add({"role": "ai", "text": text}); });
-      } else {
-        setState(() { _messages.add({"role": "ai", "text": "Le Génie a un souci (Code: ${response.statusCode})"}); });
-      }
-    } catch (e) {
-      setState(() { _messages.add({"role": "ai", "text": "Erreur de connexion : $e"}); });
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
+add_executable(${BINARY_NAME}
+  "main.cpp"
+  "resource.h"
+  "runner.rc"
+  "utils.cpp"
+  "utils.h"
+  "win32_window.cpp"
+  "win32_window.h"
+  "flutter_window.cpp"
+  "flutter_window.h"
+  ${FLUTTER_MANAGED_SOURCES}
+)
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundBlack,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, title: const Text("GÉNIE WIZZY", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white))),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final msg = _messages[index];
-                bool isMe = msg['role'] == "user";
-                return Align(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: isMe ? AppColors.primaryPurple : Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20)),
-                    child: Text(msg['text']!, style: const TextStyle(color: Colors.white)),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (_isLoading) const LinearProgressIndicator(color: Colors.amber),
-          _buildInput(),
-        ],
-      ),
-    );
-  }
+# 4. APPLIQUER LES RÉGLAGES
+apply_standard_settings(${BINARY_NAME})
 
-  Widget _buildInput() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      color: Colors.black,
-      child: Row(children: [
-        Expanded(child: TextField(controller: _controller, onSubmitted: (_) => _sendMessage(), style: const TextStyle(color: Colors.white), decoration: const InputDecoration(hintText: "Pose ta question...", border: InputBorder.none, hintStyle: TextStyle(color: Colors.white24)))),
-        IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send, color: Colors.amber)),
-      ]),
-    );
-  }
-}
+target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
+target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
+add_dependencies(${BINARY_NAME} flutter_assemble)
+
+foreach(plugin ${FLUTTER_PLUGIN_LIST})
+  add_dependencies(${BINARY_NAME} ${plugin}_assemble)
+  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
+endforeach()
