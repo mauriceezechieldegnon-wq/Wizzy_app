@@ -2,46 +2,38 @@ name: WIZZY Windows Build
 
 on:
   push:
-    branches: [ "main" ] # Déclenchement sur ta branche principale
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
-# Cette variable règle les avertissements de version de GitHub
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-      # 1. Récupération du code
       - uses: actions/checkout@v4
 
-      # 2. Installation de Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true # Accélère les builds suivants
+          # ON DESACTIVE LE CACHE POUR CE COUP-CI POUR NETTOYER LE BUG
+          cache: false 
 
-      # 3. Récupération des dépendances
       - name: Install dependencies
         run: flutter pub get
 
-      # 4. Activation du support Desktop
-      - name: Enable Windows Desktop
+      - name: Enable Windows
         run: flutter config --enable-windows-desktop
 
-      # 5. Compilation du fichier .exe
-      # Note : On utilise la commande simple car on a mis le correctif 
-      # directement dans le fichier windows/CMakeLists.txt
-      - name: Build Windows
-        run: flutter build windows --release
+      - name: Build Windows Exe
+        # On ajoute le flag pour ignorer les erreurs de version CMake de Firebase
+        run: flutter build windows --release -- -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
-      # 6. Création de l'artéfact (Le ZIP téléchargeable)
-      - name: Upload EXE
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wizzy-windows-exe
+          name: wizzy-windows-release
           path: build/windows/x64/runner/Release/
