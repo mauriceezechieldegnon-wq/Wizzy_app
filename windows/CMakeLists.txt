@@ -1,25 +1,23 @@
 cmake_minimum_required(VERSION 3.14)
 
-# 1. ANTIDOTE POUR AUDIOPLAYERS
+# 1. FIX POUR FIREBASE ET AUDIOPLAYERS
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
+# 2. NOM DU PROJET
+project(wizzy LANGUAGES CXX)
+set(BINARY_NAME "wizzy")
+
+# 3. DÉFINIR L'ANTIDOTE AVANT TOUT
 macro(apply_standard_settings TARGET)
     if(MSVC)
         target_compile_options(${TARGET} PRIVATE /W4 /WX /wd4201)
     endif()
+    target_compile_features(${TARGET} PRIVATE cxx_std_17)
 endmacro()
 
-# 2. COMPATIBILITÉ FIREBASE
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-
-project(wizzy LANGUAGES CXX)
-
-set(BINARY_NAME "wizzy")
-
-# 3. INITIALISATION FLUTTER
-set(FLUTTER_MANAGED_SOURCES "")
-include(flutter/generated_plugins.cmake)
-
-# 4. DÉFINITION DE L'EXÉCUTABLE AVEC LES BONS CHEMINS ✅
-# On ajoute "runner/" devant chaque fichier car c'est là qu'ils se cachent
+# 4. CRÉER L'EXÉCUTABLE "WIZZY" D'ABORD ✅
+# On liste les fichiers manuels. On ne met pas encore les sources gérées.
 add_executable(${BINARY_NAME}
   "runner/main.cpp"
   "runner/resource.h"
@@ -30,17 +28,25 @@ add_executable(${BINARY_NAME}
   "runner/win32_window.h"
   "runner/flutter_window.cpp"
   "runner/flutter_window.h"
-  ${FLUTTER_MANAGED_SOURCES}
 )
 
-# 5. RÉGLAGES ET LIAISONS
+# 5. MAINTENANT, CHARGER LES PLUGINS FLUTTER
+# À ce stade, "wizzy" existe, donc le fichier généré ne fera plus d'erreur.
+include(flutter/generated_plugins.cmake)
+
+# 6. AJOUTER LES SOURCES GÉRÉES PAR FLUTTER À L'EXÉCUTABLE
+if (FLUTTER_MANAGED_SOURCES)
+  target_sources(${BINARY_NAME} PRIVATE ${FLUTTER_MANAGED_SOURCES})
+endif()
+
+# 7. RÉGLAGES ET LIAISONS FINALES
 apply_standard_settings(${BINARY_NAME})
 
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
 add_dependencies(${BINARY_NAME} flutter_assemble)
 
-# Liaison des plugins (Firebase, Audioplayers, etc.)
+# Liaison automatique de tous les plugins (Firebase, Audioplayers, etc.)
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
   add_dependencies(${BINARY_NAME} ${plugin}_assemble)
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
