@@ -1,40 +1,52 @@
 cmake_minimum_required(VERSION 3.14)
-project(runner LANGUAGES CXX)
 
-# Define the application target. To change its name, change BINARY_NAME in the
-# top-level CMakeLists.txt, not the value here, or `flutter run` will no longer
-# work.
-#
-# Any new source files that you add to the application should be added here.
-add_executable(${BINARY_NAME} WIN32
-  "flutter_window.cpp"
-  "main.cpp"
-  "utils.cpp"
-  "win32_window.cpp"
-  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
-  "Runner.rc"
-  "runner.exe.manifest"
+# 1. FIX POUR AUDIOPLAYERS ET COROUTINES
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
+project(wizzy LANGUAGES CXX)
+
+set(BINARY_NAME "wizzy")
+
+# 2. CHARGER LE DOSSIER FLUTTER (Indispensable pour le moteur)
+add_subdirectory("flutter")
+
+# 3. CHARGER LES PLUGINS FLUTTER
+include(flutter/generated_plugins.cmake)
+
+# 4. FIX MACRO APPLY_STANDARD_SETTINGS
+if(NOT COMMAND apply_standard_settings)
+    macro(apply_standard_settings TARGET)
+        target_compile_features(${TARGET} PRIVATE cxx_std_17)
+    endmacro()
+endif()
+
+# 5. DÉFINITION DE L'EXÉCUTABLE (Avec le préfixe runner/ ✅)
+add_executable(${BINARY_NAME}
+  "runner/main.cpp"
+  "runner/resource.h"
+  "runner/runner.rc"
+  "runner/utils.cpp"
+  "runner/utils.h"
+  "runner/win32_window.cpp"
+  "runner/win32_window.h"
+  "runner/flutter_window.cpp"
+  "runner/flutter_window.h"
+  ${FLUTTER_MANAGED_SOURCES}
 )
 
-# Apply the standard set of build settings. This can be removed for applications
-# that need different build settings.
+# Indiquer à Windows où lire les en-têtes (.h) dans runner/
+target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/runner")
+
+# 6. APPLIQUER LES RÉGLAGES STANDARDS
 apply_standard_settings(${BINARY_NAME})
 
-# Add preprocessor definitions for the build version.
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=${FLUTTER_VERSION_PATCH}")
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTTER_VERSION_BUILD}")
-
-# Disable Windows macros that collide with C++ standard library functions.
-target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
-
-# Add dependency libraries and include directories. Add any application-specific
-# dependencies here.
+# 7. LIAISON DES BIBLIOTHÈQUES
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
-target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
-target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
-
-# Run the Flutter tool portions of the build. This must not be removed.
+target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
 add_dependencies(${BINARY_NAME} flutter_assemble)
+
+# 8. LIAISON AUTOMATIQUE DES PLUGINS
+foreach(plugin ${FLUTTER_PLUGIN_LIST})
+  add_dependencies(${BINARY_NAME} ${plugin}_assemble)
+  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
+endforeach()
