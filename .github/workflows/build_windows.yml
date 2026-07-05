@@ -19,7 +19,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # ON DESACTIVE LE CACHE POUR CE COUP-CI POUR NETTOYER LE BUG
           cache: false 
 
       - name: Install dependencies
@@ -28,9 +27,21 @@ jobs:
       - name: Enable Windows
         run: flutter config --enable-windows-desktop
 
+      # --- L'ÉTAPE MAGIQUE : ON FORCE LA VERSION 3.5 DANS LES FICHIERS DE PLUGINS ---
+      - name: Patch Firebase CMake
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path . -Filter "CMakeLists.txt" -Recurse
+          foreach ($file in $files) {
+              $content = Get-Content $file.FullName
+              $content = $content -replace 'cmake_minimum_required\(VERSION 3\.0\)', 'cmake_minimum_required(VERSION 3.5)'
+              $content = $content -replace 'cmake_minimum_required\(VERSION 3\.1\)', 'cmake_minimum_required(VERSION 3.5)'
+              Set-Content $file.FullName $content
+          }
+
       - name: Build Windows Exe
-        # On ajoute le flag pour ignorer les erreurs de version CMake de Firebase
-        run: flutter build windows --release -- -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        # On utilise la commande la plus simple possible sans tirets bizarres
+        run: flutter build windows --release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
