@@ -1,19 +1,24 @@
 cmake_minimum_required(VERSION 3.14)
 
-# 1. FIX CRITIQUE POUR AUDIOPLAYERS
+# --- 1. L'ANTIDOTE : ON DÉFINIT LA COMMANDE MANQUANTE POUR LES PLUGINS ---
+macro(apply_standard_settings TARGET)
+    target_compile_features(${TARGET} PRIVATE cxx_std_17)
+endmacro()
+# -----------------------------------------------------------------------
+
+# 2. FIX POUR AUDIOPLAYERS
 add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 
-# 2. NOM DU PROJET (DOIT MATCH AVEC LE DOSSIER)
 project(wizzy LANGUAGES CXX)
 
-# 3. CONFIGURATION FLUTTER
 set(BINARY_NAME "wizzy")
 
-# On charge les outils Flutter
+# 3. CHARGER LES OUTILS FLUTTER
+# On initialise FLUTTER_MANAGED_SOURCES pour éviter les erreurs de variables vides
+set(FLUTTER_MANAGED_SOURCES "")
 include(flutter/generated_plugins.cmake)
 
 # 4. DÉFINITION DE L'EXÉCUTABLE
-# Note : FLUTTER_MANAGED_SOURCES est rempli par generated_plugins.cmake
 add_executable(${BINARY_NAME}
   "main.cpp"
   "resource.h"
@@ -27,24 +32,15 @@ add_executable(${BINARY_NAME}
   ${FLUTTER_MANAGED_SOURCES}
 )
 
-# 5. APPLIQUER LES RÉGLAGES STANDARDS
-# On définit la macro si elle manque (sécurité GitHub)
-if(NOT COMMAND apply_standard_settings)
-    macro(apply_standard_settings TARGET)
-        target_compile_features(${TARGET} PRIVATE cxx_std_17)
-    endmacro()
-endif()
-
+# 5. APPLIQUER LES RÉGLAGES (Utilise l'antidote défini plus haut)
 apply_standard_settings(${BINARY_NAME})
 
 # 6. LIAISON DES BIBLIOTHÈQUES
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
-
-# 7. ASSEMBLAGE DES DÉPENDANCES
 add_dependencies(${BINARY_NAME} flutter_assemble)
 
-# Liaison de tous les plugins (Firebase, Audioplayers, etc.)
+# 7. LIAISON AUTOMATIQUE DES PLUGINS (Firebase, Audioplayers, etc.)
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
   add_dependencies(${BINARY_NAME} ${plugin}_assemble)
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
