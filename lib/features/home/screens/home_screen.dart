@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wizzy/core/constants/app_colors.dart';
 import 'package:wizzy/shared/widgets/dls_card.dart';
-import 'package:wizzy/features/quiz/screens/arena_menu_screen.dart';
+import 'package:wizzy/features/home/screens/category_picker_screen.dart';
 import 'package:wizzy/features/marketplace/screens/marketplace_screen.dart';
 import 'package:wizzy/features/messenger/screens/users_list_screen.dart';
 import 'package:wizzy/features/ai_assistant/screens/ai_chat_screen.dart';
@@ -21,7 +21,7 @@ class HomeScreen extends StatelessWidget {
     final User? user = FirebaseAuth.instance.currentUser;
     double screenWidth = MediaQuery.of(context).size.width;
     int crossAxisCount = screenWidth > 900 ? 4 : 2;
-    double aspectRatio = screenWidth > 900 ? 1.5 : 0.9;
+    double aspectRatio = screenWidth > 900 ? 1.5 : 0.85;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
@@ -54,10 +54,10 @@ class HomeScreen extends StatelessWidget {
                       childAspectRatio: aspectRatio,
                     ),
                     delegate: SliverChildListDelegate([
-                      DlsCard(title: "L'ARÈNE", subtitle: "GLORY", rating: "98", icon: FontAwesomeIcons.bolt, color: Colors.amber, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArenaMenuScreen()))),
-                      DlsCard(title: "LE BAZAR", subtitle: "ITEMS", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))),
-                      DlsCard(title: "LE SALON", subtitle: "CHAT", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))),
-                      DlsCard(title: "LE GÉNIE", subtitle: "AI", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()))),
+                      DlsCard(title: "L'ARÈNE", subtitle: "MODE GLORE", rating: "98", icon: FontAwesomeIcons.bolt, color: Colors.amber, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CategoryPickerScreen()))),
+                      DlsCard(title: "LE BAZAR", subtitle: "MARKETPLACE", rating: "94", icon: FontAwesomeIcons.bagShopping, color: Colors.blueAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplaceScreen()))),
+                      DlsCard(title: "LE SALON", subtitle: "MESSENGER", rating: "88", icon: FontAwesomeIcons.comments, color: Colors.greenAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersListScreen()))),
+                      DlsCard(title: "LE GÉNIE", subtitle: "IA WIZZY", rating: "99", icon: FontAwesomeIcons.brain, color: Colors.deepPurpleAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AIChatScreen()))),
                     ]),
                   ),
                 ),
@@ -109,7 +109,7 @@ class HomeScreen extends StatelessWidget {
                   const Text("SOLDE WIZZY", style: TextStyle(color: Colors.white38, fontSize: 10)),
                   Text("$pts PTS", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
                 ]),
-                const Icon(Icons.bolt, color: Colors.amber), // CHANGÉ POUR MATERIAL
+                const Icon(Icons.bolt, color: AppColors.accentYellow),
               ],
             ),
           ),
