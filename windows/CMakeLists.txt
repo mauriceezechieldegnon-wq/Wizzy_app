@@ -1,19 +1,33 @@
 cmake_minimum_required(VERSION 3.14)
 
-# --- ANTIDOTE AUDIOPLAYERS (Défini globalement ici) ---
-macro(apply_standard_settings TARGET)
-    target_compile_features(${TARGET} PRIVATE cxx_std_17)
-endmacro()
-add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
-# ------------------------------------------------------
+# 1. CHARGER LES PLUGINS ICI ✅ (On remonte d'un dossier pour trouver le fichier)
+include(../flutter/generated_plugins.cmake)
 
-# FIX FIREBASE
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+# 2. DÉFINITION DE L'EXÉCUTABLE
+add_executable(${BINARY_NAME}
+  "main.cpp"
+  "resource.h"
+  "runner.rc"
+  "utils.cpp"
+  "utils.h"
+  "win32_window.cpp"
+  "win32_window.h"
+  "flutter_window.cpp"
+  "flutter_window.h"
+  ${FLUTTER_MANAGED_SOURCES}
+)
 
-project(wizzy LANGUAGES CXX)
+# 3. APPLIQUER LES RÉGLAGES (Hérités du parent)
+apply_standard_settings(${BINARY_NAME})
 
-set(BINARY_NAME "wizzy")
+# 4. LIAISONS COEUR
+target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
+target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
 
-include(flutter/generated_plugins.cmake)
+# 5. ASSEMBLAGE ET PLUGINS
+add_dependencies(${BINARY_NAME} flutter_assemble)
 
-add_subdirectory(runner)
+foreach(plugin ${FLUTTER_PLUGIN_LIST})
+  add_dependencies(${BINARY_NAME} ${plugin}_assemble)
+  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
+endforeach()
