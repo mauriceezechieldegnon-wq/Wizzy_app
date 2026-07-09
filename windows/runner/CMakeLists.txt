@@ -26,11 +26,3 @@ foreach(plugin ${FLUTTER_PLUGIN_LIST})
   add_dependencies(${BINARY_NAME} ${plugin}_assemble)
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
 endforeach()
-NAME} PRIVATE ${FLUTTER_LIBRARY})
-
-add_dependencies(${BINARY_NAME} flutter_assemble)
-
-foreach(plugin ${FLUTTER_PLUGIN_LIST})
-  add_dependencies(${BINARY_NAME} ${plugin}_assemble)
-  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
-endforeach()
