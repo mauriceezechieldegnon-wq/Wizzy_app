@@ -34,6 +34,7 @@ android {
     }
 
     defaultConfig {
+        multiDexEnabled = true
         applicationId = "com.dem.wizzy"
         // On garde 23 pour que le téléphone de ton ami soit compatible
         minSdk = 23 
