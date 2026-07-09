@@ -1,1 +1,1 @@
-# Désactivé pour centralisation
+# Désactivé pour centralisation.
