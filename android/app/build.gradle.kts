@@ -9,22 +9,15 @@ plugins {
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.reader(Charsets.UTF_8).use { reader ->
-        localProperties.load(reader)
-    }
+    localPropertiesFile.reader(Charsets.UTF_8).use { reader -> localProperties.load(reader) }
 }
-
-val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
-val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
 
 android {
     namespace = "com.dem.wizzy"
-    // --- FORCE LE PASSAGE AU SDK 36 POUR LES PLUGINS 2026 ---
-    compileSdk = 36 
+    compileSdk = 35 
 
     compileOptions {
-        // --- REQUIERT PAR LES NOTIFICATIONS (ERREUR 1 DU LOG) ---
-        isCoreLibraryDesugaringEnabled = true 
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -34,14 +27,10 @@ android {
     }
 
     defaultConfig {
-        multiDexEnabled = true
         applicationId = "com.dem.wizzy"
-        // On garde 23 pour que le téléphone de ton ami soit compatible
-        minSdk = 23 
-        targetSdk = 36
-        versionCode = flutterVersionCode.toInt()
-        versionName = flutterVersionName
-        multiDexEnabled = true
+        minSdk = 23 // Android 6.0+ pour être tranquille
+        targetSdk = 35
+        multiDexEnabled = true // INDISPENSABLE pour éviter le crash au démarrage
     }
 
     buildTypes {
@@ -53,11 +42,6 @@ android {
     }
 }
 
-flutter {
-    source = "../.."
-}
-
 dependencies {
-    // --- BIBLIOTHÈQUE DE DESUGARING POUR LES NOTIFS ---
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
