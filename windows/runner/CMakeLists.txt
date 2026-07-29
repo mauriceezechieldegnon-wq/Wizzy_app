@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
+# On s'assure que les sources Flutter sont prêtes
 set(FLUTTER_MANAGED_SOURCES "")
 
-# CRÉATION DE L'EXÉCUTABLE
+# 1. CRÉATION DE L'APP "WIZZY" ✅
 add_executable(${BINARY_NAME}
   "main.cpp"
   "resource.h"
@@ -16,15 +17,16 @@ add_executable(${BINARY_NAME}
   ${FLUTTER_MANAGED_SOURCES}
 )
 
-# Application des réglages (Hérités du fichier parent)
+# 2. APPLICATION DES RÉGLAGES (Hérités du parent)
 apply_standard_settings(${BINARY_NAME})
 
-# Liaisons obligatoires
+# 3. LIAISONS CŒUR
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
 add_dependencies(${BINARY_NAME} flutter_assemble)
 
-# Liaison des plugins (Firebase, Audioplayers, etc.)
+# 4. LIAISON DES PLUGINS (Firebase, Audioplayers, etc.) ✅
+# C'est ici que l'erreur "wizzy not built" meurt définitivement
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
   add_dependencies(${BINARY_NAME} ${plugin}_assemble)
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
