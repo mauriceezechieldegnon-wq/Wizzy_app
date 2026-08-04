@@ -1,44 +1,111 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:wizzy/core/constants/app_colors.dart';
 
-class DlsCard extends StatelessWidget {
+class DLSCard extends StatelessWidget {
   final String title;
-  final String subtitle;
-  final dynamic icon; 
-  final Color color;
   final String rating;
-  final VoidCallback onTap;
+  final Widget child;
+  final bool isGoldVIP;
+  final VoidCallback? onTap;
 
-  const DlsCard({super.key, required this.title, required this.subtitle, required this.icon, required this.color, required this.rating, required this.onTap});
+  const DLSCard({
+    super.key,
+    required this.title,
+    required this.rating,
+    required this.child,
+    this.isGoldVIP = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final primaryGlow = isGoldVIP ? AppColors.goldVIP : AppColors.neonYellow;
+    final borderColor = isGoldVIP ? AppColors.goldVIP : AppColors.electricPurple;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(1.5),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.1)]),
+          color: AppColors.darkCard,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: borderColor, width: 2.0),
+          boxShadow: [
+            BoxShadow(
+              color: primaryGlow.withValues(alpha: 0.25),
+              blurRadius: 12.0,
+              spreadRadius: 1.0,
+            ),
+          ],
         ),
-        child: Container(
-          decoration: BoxDecoration(color: const Color(0xFF121212), borderRadius: BorderRadius.circular(14)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14.0),
           child: Stack(
             children: [
+              Positioned(
+                right: -20,
+                bottom: -20,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: borderColor.withValues(alpha: 0.15),
+                  ),
+                ),
+              ),
               Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(rating, style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.w900)),
-                        icon is IconData ? Icon(icon as IconData, color: color, size: 16) : FaIcon(icon as FaIconData, color: color, size: 16),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(color: primaryGlow, width: 1.5),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            rating,
+                            style: TextStyle(
+                              color: primaryGlow,
+                              fontSize: 22,
+                              fontWeight: FontWeight.black,
+                            ),
+                          ),
+                          Text(
+                            isGoldVIP ? "VIP" : "PRO",
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900)),
+                    const SizedBox(width: 16.0),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title.toUpperCase(),
+                            style: const TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 18,
+                              fontWeight: FontWeight.black,
+                              letterSpacing: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 6.0),
+                          child,
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
