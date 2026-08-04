@@ -1,28 +1,28 @@
 cmake_minimum_required(VERSION 3.14)
+project(wizzy LANGUAGES CXX)
 
-set(FLUTTER_MANAGED_SOURCES "")
+# Correctif de rétrocompatibilité pour les plugins audio/media (ex: audioplayers)
+macro(apply_standard_settings TARGET)
+  target_compile_features(${TARGET} PUBLIC cxx_std_17)
+endmacro()
 
-add_executable(${BINARY_NAME}
+set(BINARY_NAME "wizzy")
+
+include(flutter/generated_plugins.cmake)
+
+add_subdirectory(flutter)
+
+add_executable(${BINARY_NAME} WIN32
   "main.cpp"
-  "resource.h"
-  "runner.rc"
   "utils.cpp"
-  "utils.h"
   "win32_window.cpp"
-  "win32_window.h"
   "flutter_window.cpp"
-  "flutter_window.h"
-  ${FLUTTER_MANAGED_SOURCES}
+  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
+  "runner.rc"
 )
 
 apply_standard_settings(${BINARY_NAME})
-
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
-target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
+target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_dependencies(${BINARY_NAME} flutter_assemble)
-
-foreach(plugin ${FLUTTER_PLUGIN_LIST})
-  add_dependencies(${BINARY_NAME} ${plugin}_assemble)
-  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
-endforeach()
