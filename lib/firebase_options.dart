@@ -1,31 +1,44 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
-    if (kIsWeb) return web;
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows) {
+      return web;
+    }
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android: return android;
-      case TargetPlatform.windows: return web; // Fix Windows
-      case TargetPlatform.macOS: return web;   // Fix Mac
-      default: throw UnsupportedError('Platform not supported');
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      default:
+        return web;
     }
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: "AIzaSyDBpiAWsfdDZrdO_Sn7pAaX_xzGttAMeUA",
-    appId: "1:443299913856:web:e3d84f2149506053678665",
-    messagingSenderId: "443299913856",
-    projectId: 'wizzy-3a250',
-    authDomain: 'wizzy-3a250.firebaseapp.com',
-    storageBucket: 'wizzy-3a250.appspot.com',
+    apiKey: "AIzaSyDummyWebKeyForWizzyApp2026",
+    appId: "1:10000000000:web:wizzy",
+    messagingSenderId: "10000000000",
+    projectId: "wizzy-dem",
+    authDomain: "wizzy-dem.firebaseapp.com",
+    storageBucket: "wizzy-dem.appspot.com",
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: "AIzaSyDBpiAWsfdDZrdO_Sn7pAaX_xzGttAMeUA",
-    appId: "1:443299913856:android:6ba6608a5a681def678665",
-    messagingSenderId: "443299913856",
-    projectId: 'wizzy-3a250',
-    storageBucket: 'wizzy-3a250.appspot.com',
+    apiKey: "AIzaSyDummyAndroidKeyForWizzyApp2026",
+    appId: "1:10000000000:android:wizzy",
+    messagingSenderId: "10000000000",
+    projectId: "wizzy-dem",
+    storageBucket: "wizzy-dem.appspot.com",
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: "AIzaSyDummyIosKeyForWizzyApp2026",
+    appId: "1:10000000000:ios:wizzy",
+    messagingSenderId: "10000000000",
+    projectId: "wizzy-dem",
+    storageBucket: "wizzy-dem.appspot.com",
+    iosBundleId: "com.demproductions.wizzy",
   );
 }
