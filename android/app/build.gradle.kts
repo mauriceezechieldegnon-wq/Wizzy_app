@@ -1,28 +1,14 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.reader(Charsets.UTF_8).use { reader ->
-        localProperties.load(reader)
-    }
-}
-
-val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
-val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
-
 android {
-    namespace = "com.dem.wizzy"
-    compileSdk = 36 // Requis par tes plugins 2026 ✅
+    namespace = "com.demproductions.wizzy"
+    compileSdk = 36
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true // Requis pour les notifs ✅
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -32,28 +18,21 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.dem.wizzy"
+        applicationId = "com.demproductions.wizzy"
         minSdk = 23
         targetSdk = 36
-        versionCode = flutterVersionCode.toInt()
-        versionName = flutterVersionName
+        versionCode = 1
+        versionName = "1.0.0"
         multiDexEnabled = true
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false
-            isShrinkResources = false
         }
     }
 }
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    // Version 2.1.4 minimum requise pour SDK 36
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
