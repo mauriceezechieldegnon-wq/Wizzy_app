@@ -1,28 +1,21 @@
-cmake_minimum_required(VERSION 3.14)
+set(FLUTTER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral/flutter_windows.dll")
+set(FLUTTER_ICU_DATA "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral/icudtl.dat")
+set(FLUTTER_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral")
 
-set(FLUTTER_MANAGED_SOURCES "")
-
-add_executable(${BINARY_NAME}
-  "main.cpp"
-  "resource.h"
-  "runner.rc"
-  "utils.cpp"
-  "utils.h"
-  "win32_window.cpp"
-  "win32_window.h"
-  "flutter_window.cpp"
-  "flutter_window.h"
-  ${FLUTTER_MANAGED_SOURCES}
+list(APPEND FLUTTER_LIBRARY_HEADERS
+  "${FLUTTER_LIB_DIR}/flutter_export.h"
+  "${FLUTTER_LIB_DIR}/flutter_messenger.h"
+  "${FLUTTER_LIB_DIR}/flutter_plugin_registrar.h"
+  "${FLUTTER_LIB_DIR}/flutter_texture_registrar.h"
+  "${FLUTTER_LIB_DIR}/flutter_windows.h"
 )
 
-apply_standard_settings(${BINARY_NAME})
+set(FLUTTER_MANAGED_SOURCES
+  "flutter/generated_plugin_registrant.cc"
+  "flutter/generated_plugin_registrant.h"
+)
 
-target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
-target_link_libraries(${BINARY_NAME} PRIVATE ${FLUTTER_LIBRARY})
-
-add_dependencies(${BINARY_NAME} flutter_assemble)
-
-foreach(plugin ${FLUTTER_PLUGIN_LIST})
-  add_dependencies(${BINARY_NAME} ${plugin}_assemble)
-  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin})
-endforeach()
+function(apply_standard_settings TARGET)
+  target_compile_features(${TARGET} PRIVATE cxx_std_17)
+  target_compile_options(${TARGET} PRIVATE /W4 /WX /wd4201)
+endfunction()
